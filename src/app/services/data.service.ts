@@ -1,119 +1,64 @@
 import { Injectable } from '@angular/core';
-import { User, Meal, Order } from '../models';
+import { Meal, Order, User } from '../models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
-  
   constructor() {
-    this.initializeData();
+    this.initializeDefaultData();
   }
 
-  private initializeData() {
-    if (!localStorage.getItem('users')) {
-      const initialUsers: User[] = [
-        {
-          id: '1',
-          username: 'admin',
-          password: 'admin123',
-          role: 'admin',
-          name: 'Admin User'
-        },
-        {
-          id: '2',
-          username: 'pizza_palace',
-          password: 'restaurant123',
-          role: 'restaurant',
-          name: 'Pizza Palace',
-          restaurantName: 'Pizza Palace',
-          phone: '0312 123 45 67',
-          address: 'Çankaya, Ankara'
-        },
-        {
-          id: '3',
-          username: 'kurye1',
-          password: 'courier123',
-          role: 'courier',
-          name: 'Ali Kurye',
-          phone: '0532 123 45 67'
-        },
-        {
-          id: '4',
-          username: 'customer1',
-          password: 'customer123',
-          role: 'customer',
-          name: 'Müşteri Ahmet',
-          address: 'Kızılay, Ankara',
-          phone: '0542 123 45 67'
-        }
-      ];
-      
-      localStorage.setItem('users', JSON.stringify(initialUsers));
-    }
-
-    if (!localStorage.getItem('meals')) {
-      const initialMeals: Meal[] = [
+  private initializeDefaultData() {
+    // Default meals
+    const meals = this.getMeals();
+    if (meals.length === 0) {
+      const defaultMeals: Meal[] = [
         {
           id: '1',
           restaurantId: '2',
           name: 'Margherita Pizza',
-          price: 89.90,
-          description: 'Klasik domates sosu, mozzarella peyniri ve taze fesleğen',
+          price: 45.99,
+          description: 'Klasik domates sosu, mozzarella ve fesleğen',
           category: 'Pizza',
-          isAvailable: true,
-          preparationTime: 20
+          available: true
         },
         {
           id: '2',
           restaurantId: '2',
           name: 'Pepperoni Pizza',
-          price: 105.90,
-          description: 'Pepperoni sosisi ve mozzarella peyniri',
+          price: 52.99,
+          description: 'Domates sosu, mozzarella ve pepperoni',
           category: 'Pizza',
-          isAvailable: true,
-          preparationTime: 22
+          available: true
         },
         {
           id: '3',
-          restaurantId: '2',
-          name: 'Karışık Pizza',
-          price: 125.90,
-          description: 'Sucuk, salam, mozzarella, domates, biber',
-          category: 'Pizza',
-          isAvailable: true,
-          preparationTime: 25
+          restaurantId: '3',
+          name: 'Whopper Burger',
+          price: 39.99,
+          description: 'Büyük boy burger, özel sos ile',
+          category: 'Burger',
+          available: true
+        },
+        {
+          id: '4',
+          restaurantId: '3',
+          name: 'Chicken Royale',
+          price: 35.99,
+          description: 'Tavuk burger, mayonez ve salata',
+          category: 'Burger',
+          available: true
         }
       ];
-      
-      localStorage.setItem('meals', JSON.stringify(initialMeals));
+      localStorage.setItem('meals', JSON.stringify(defaultMeals));
     }
-
-    if (!localStorage.getItem('orders')) {
-      localStorage.setItem('orders', JSON.stringify([]));
-    }
-  }
-
-  // Users
-  getUsers(): User[] {
-    return JSON.parse(localStorage.getItem('users') || '[]');
-  }
-
-  saveUsers(users: User[]): void {
-    localStorage.setItem('users', JSON.stringify(users));
-  }
-
-  getUserById(id: string): User | undefined {
-    return this.getUsers().find(user => user.id === id);
   }
 
   // Meals
   getMeals(): Meal[] {
-    return JSON.parse(localStorage.getItem('meals') || '[]');
-  }
-
-  saveMeals(meals: Meal[]): void {
-    localStorage.setItem('meals', JSON.stringify(meals));
+    const meals = localStorage.getItem('meals');
+    return meals ? JSON.parse(meals) : [];
   }
 
   getMealsByRestaurant(restaurantId: string): Meal[] {
@@ -124,56 +69,36 @@ export class DataService {
     return this.getMeals().find(meal => meal.id === id);
   }
 
-  addMeal(meal: Meal): void {
+  saveMeal(meal: Meal): void {
     const meals = this.getMeals();
-    meals.push(meal);
-    this.saveMeals(meals);
-  }
-
-  updateMeal(updatedMeal: Meal): void {
-    const meals = this.getMeals();
-    const index = meals.findIndex(meal => meal.id === updatedMeal.id);
-    if (index !== -1) {
-      meals[index] = updatedMeal;
-      this.saveMeals(meals);
+    const index = meals.findIndex(m => m.id === meal.id);
+    
+    if (index >= 0) {
+      meals[index] = meal;
+    } else {
+      meals.push(meal);
     }
+    
+    localStorage.setItem('meals', JSON.stringify(meals));
   }
 
   deleteMeal(id: string): void {
     const meals = this.getMeals().filter(meal => meal.id !== id);
-    this.saveMeals(meals);
+    localStorage.setItem('meals', JSON.stringify(meals));
   }
 
   // Orders
   getOrders(): Order[] {
-    return JSON.parse(localStorage.getItem('orders') || '[]');
-  }
-
-  saveOrders(orders: Order[]): void {
-    localStorage.setItem('orders', JSON.stringify(orders));
-  }
-
-  addOrder(order: Order): void {
-    const orders = this.getOrders();
-    orders.push(order);
-    this.saveOrders(orders);
-  }
-
-  updateOrder(updatedOrder: Order): void {
-    const orders = this.getOrders();
-    const index = orders.findIndex(order => order.id === updatedOrder.id);
-    if (index !== -1) {
-      orders[index] = updatedOrder;
-      this.saveOrders(orders);
-    }
-  }
-
-  getOrdersByCustomer(customerId: string): Order[] {
-    return this.getOrders().filter(order => order.customerId === customerId);
+    const orders = localStorage.getItem('orders');
+    return orders ? JSON.parse(orders) : [];
   }
 
   getOrdersByRestaurant(restaurantId: string): Order[] {
     return this.getOrders().filter(order => order.restaurantId === restaurantId);
+  }
+
+  getOrdersByCustomer(customerId: string): Order[] {
+    return this.getOrders().filter(order => order.customerId === customerId);
   }
 
   getOrdersByCourier(courierId: string): Order[] {
@@ -181,17 +106,50 @@ export class DataService {
   }
 
   getAvailableOrdersForCourier(): Order[] {
-    return this.getOrders().filter(order => 
-      order.status === 'ready' && !order.courierId
-    );
+    return this.getOrders().filter(order => order.status === 'ready' && !order.courierId);
   }
 
-  // Restaurants
+  saveOrder(order: Order): void {
+    const orders = this.getOrders();
+    const index = orders.findIndex(o => o.id === order.id);
+    
+    if (index >= 0) {
+      orders[index] = order;
+    } else {
+      orders.push(order);
+    }
+    
+    localStorage.setItem('orders', JSON.stringify(orders));
+  }
+
+  updateOrderStatus(orderId: string, status: Order['status'], courierId?: string): void {
+    const orders = this.getOrders();
+    const order = orders.find(o => o.id === orderId);
+    
+    if (order) {
+      order.status = status;
+      if (courierId) {
+        order.courierId = courierId;
+        const users = this.getUsers();
+        const courier = users.find(u => u.id === courierId);
+        if (courier) {
+          order.courierName = courier.name || courier.username;
+        }
+      }
+      localStorage.setItem('orders', JSON.stringify(orders));
+    }
+  }
+
+  // Users
+  getUsers(): User[] {
+    const users = localStorage.getItem('users');
+    return users ? JSON.parse(users) : [];
+  }
+
   getRestaurants(): User[] {
     return this.getUsers().filter(user => user.role === 'restaurant');
   }
 
-  // Couriers
   getCouriers(): User[] {
     return this.getUsers().filter(user => user.role === 'courier');
   }

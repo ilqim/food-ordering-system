@@ -1,15 +1,14 @@
-import { Meal } from './meal.model';
-
 export interface CartItem {
-  meal: Meal;
+  mealId: string;
+  mealName: string;
+  restaurantId: string;
+  restaurantName: string;
   quantity: number;
-  totalPrice: number;
+  price: number;
 }
 
 export interface Cart {
-  userId: string;
-  restaurantId?: string;
-  restaurantName?: string;
   items: CartItem[];
   totalPrice: number;
+  restaurantId?: string; // Tüm ürünler aynı restorandan olmalı
 }

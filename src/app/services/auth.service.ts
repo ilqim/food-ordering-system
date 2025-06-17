@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { User } from '../models/user.model';
-import { DataService } from './data.service';
-import { Router } from '@angular/router';
+import { User } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -11,65 +9,113 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(
-    private dataService: DataService,
-    private router: Router
-  ) {
+  constructor() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       this.currentUserSubject.next(JSON.parse(savedUser));
     }
+    this.initializeDefaultUsers();
+  }
+
+  private initializeDefaultUsers() {
+    const users = this.getUsers();
+    if (users.length === 0) {
+      const defaultUsers: User[] = [
+        {
+          id: '1',
+          username: 'admin',
+          password: 'admin123',
+          role: 'admin',
+          name: 'Admin User'
+        },
+        {
+          id: '2',
+          username: 'pizza_palace',
+          password: 'restaurant123',
+          role: 'restaurant',
+          name: 'Pizza Palace',
+          restaurantName: 'Pizza Palace',
+          phone: '0532 123 45 67'
+        },
+        {
+          id: '3',
+          username: 'burger_king',
+          password: 'restaurant123',
+          role: 'restaurant',
+          name: 'Burger King',
+          restaurantName: 'Burger King',
+          phone: '0532 234 56 78'
+        },
+        {
+          id: '4',
+          username: 'courier1',
+          password: 'courier123',
+          role: 'courier',
+          name: 'Ahmet Kurye',
+          phone: '0533 345 67 89'
+        },
+        {
+          id: '5',
+          username: 'customer1',
+          password: 'customer123',
+          role: 'customer',
+          name: 'Mehmet Müşteri',
+          phone: '0534 456 78 90',
+          address: 'Çankaya, Ankara'
+        }
+      ];
+      localStorage.setItem('users', JSON.stringify(defaultUsers));
+    }
   }
 
   login(username: string, password: string): boolean {
-    const users = this.dataService.getUsers();
+    const users = this.getUsers();
     const user = users.find(u => u.username === username && u.password === password);
     
     if (user) {
-      this.currentUserSubject.next(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
-      this.redirectAfterLogin(user.role);
+      this.currentUserSubject.next(user);
       return true;
     }
     return false;
   }
 
-  logout(): void {
-    this.currentUserSubject.next(null);
+  logout() {
     localStorage.removeItem('currentUser');
-    localStorage.removeItem('currentCart');
-    this.router.navigate(['/login']);
+    this.currentUserSubject.next(null);
   }
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
   }
 
-  isAuthenticated(): boolean {
-    return this.currentUserSubject.value !== null;
+  isLoggedIn(): boolean {
+    return this.getCurrentUser() !== null;
   }
 
   hasRole(role: string): boolean {
     const user = this.getCurrentUser();
-    return user ? user.role === role : false;
+    return user?.role === role;
   }
 
-  private redirectAfterLogin(role: string): void {
-    switch (role) {
-      case 'customer':
-        this.router.navigate(['/home']);
-        break;
-      case 'restaurant':
-        this.router.navigate(['/restaurant-panel']);
-        break;
-      case 'courier':
-        this.router.navigate(['/courier-panel']);
-        break;
-      case 'admin':
-        this.router.navigate(['/home']);
-        break;
-      default:
-        this.router.navigate(['/home']);
+  private getUsers(): User[] {
+    const users = localStorage.getItem('users');
+    return users ? JSON.parse(users) : [];
+  }
+
+  register(user: Omit<User, 'id'>): boolean {
+    const users = this.getUsers();
+    const exists = users.some(u => u.username === user.username);
+    
+    if (!exists) {
+      const newUser: User = {
+        ...user,
+        id: Date.now().toString()
+      };
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+      return true;
     }
+    return false;
   }
 }

@@ -4,8 +4,8 @@ export interface User {
   password: string;
   role: 'admin' | 'restaurant' | 'courier' | 'customer';
   name?: string;
-  email?: string;
   phone?: string;
+  email?: string;
   address?: string;
-  restaurantName?: string;
+  restaurantName?: string; // Restoran kullanıcıları için
 }

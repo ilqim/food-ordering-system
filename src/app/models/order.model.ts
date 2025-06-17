@@ -3,7 +3,6 @@ export interface OrderItem {
   mealName: string;
   quantity: number;
   price: number;
-  totalPrice: number;
 }
 
 export interface Order {
@@ -15,12 +14,11 @@ export interface Order {
   courierId?: string;
   courierName?: string;
   items: OrderItem[];
-  status: 'pending' | 'accepted' | 'preparing' | 'ready' | 'on_the_way' | 'delivered' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'onTheWay' | 'delivered' | 'cancelled';
   address: string;
   phone: string;
   totalPrice: number;
   orderDate: Date;
-  deliveryTime?: Date;
   notes?: string;
-  paymentMethod: 'cash' | 'card';
+  paymentMethod?: 'cash' | 'card';
 }

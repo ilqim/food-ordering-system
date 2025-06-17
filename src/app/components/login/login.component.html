@@ -1,0 +1,64 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>🍕 Yemek Sipariş</h1>
+      <p>Hesabınıza giriş yapın</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="username">Kullanıcı Adı</label>
+        <input
+          type="text"
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          class="form-control"
+          placeholder="Kullanıcı adınızı girin"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Şifre</label>
+        <input
+          type="password"
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          class="form-control"
+          placeholder="Şifrenizi girin"
+          required
+        />
+      </div>
+
+      <div class="error-message" *ngIf="error">
+        {{ error }}
+      </div>
+
+      <button type="submit" class="btn-login" [disabled]="!username || !password">
+        Giriş Yap
+      </button>
+    </form>
+
+    <div class="test-accounts-section">
+      <button type="button" class="btn-test-toggle" (click)="toggleTestAccounts()">
+        {{ showTestAccounts ? 'Test Hesaplarını Gizle' : 'Test Hesaplarını Göster' }}
+      </button>
+
+      <div class="test-accounts" *ngIf="showTestAccounts">
+        <h3>Test Hesapları</h3>
+        <div class="test-account-list">
+          <div 
+            *ngFor="let account of testAccounts" 
+            class="test-account-item"
+            (click)="useTestAccount(account)"
+          >
+            <strong>{{ account.role }}</strong>
+            <small>{{ account.username }} / {{ account.password }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Order, OrderItem } from '../models/order.model';
-import { Cart } from '../models/cart.model';
+import { Order, OrderItem } from '../models';
 import { DataService } from './data.service';
 import { AuthService } from './auth.service';
 import { CartService } from './cart.service';
@@ -9,88 +8,66 @@ import { CartService } from './cart.service';
   providedIn: 'root'
 })
 export class OrderService {
-
   constructor(
     private dataService: DataService,
     private authService: AuthService,
     private cartService: CartService
   ) {}
 
-  createOrderFromCart(cart: Cart, address: string, phone: string, paymentMethod: 'cash' | 'card', notes?: string): Order | null {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser || cart.items.length === 0) return null;
+  createOrder(address: string, phone: string, notes?: string, paymentMethod: 'cash' | 'card' = 'cash'): string | null {
+    const user = this.authService.getCurrentUser();
+    const cart = this.cartService.getCart();
 
-    const restaurant = this.dataService.getUserById(cart.restaurantId!);
-    if (!restaurant) return null;
+    if (!user || cart.items.length === 0) {
+      return null;
+    }
+
+    const restaurants = this.dataService.getRestaurants();
+    const restaurant = restaurants.find(r => r.id === cart.restaurantId);
+
+    if (!restaurant) {
+      return null;
+    }
 
     const orderItems: OrderItem[] = cart.items.map(item => ({
-      mealId: item.meal.id,
-      mealName: item.meal.name,
+      mealId: item.mealId,
+      mealName: item.mealName,
       quantity: item.quantity,
-      price: item.meal.price,
-      totalPrice: item.totalPrice
+      price: item.price
     }));
 
     const order: Order = {
-      id: this.generateOrderId(),
-      customerId: currentUser.id,
-      customerName: currentUser.name || currentUser.username,
+      id: Date.now().toString(),
+      customerId: user.id,
+      customerName: user.name || user.username,
       restaurantId: cart.restaurantId!,
-      restaurantName: restaurant.restaurantName || restaurant.name || 'Bilinmeyen Restoran',
+      restaurantName: restaurant.restaurantName || restaurant.name || restaurant.username,
       items: orderItems,
       status: 'pending',
-      address: address,
-      phone: phone,
+      address,
+      phone,
       totalPrice: cart.totalPrice,
       orderDate: new Date(),
-      notes: notes,
-      paymentMethod: paymentMethod
+      notes,
+      paymentMethod
     };
 
-    this.dataService.addOrder(order);
+    this.dataService.saveOrder(order);
     this.cartService.clearCart();
     
-    return order;
+    return order.id;
   }
 
   updateOrderStatus(orderId: string, status: Order['status'], courierId?: string): boolean {
-    const orders = this.dataService.getOrders();
-    const order = orders.find(o => o.id === orderId);
-    
-    if (!order) return false;
-
-    order.status = status;
-    
-    if (courierId && status === 'on_the_way') {
-      const courier = this.dataService.getUserById(courierId);
-      order.courierId = courierId;
-      order.courierName = courier?.name || 'Bilinmeyen Kurye';
+    try {
+      this.dataService.updateOrderStatus(orderId, status, courierId);
+      return true;
+    } catch (error) {
+      return false;
     }
-
-    if (status === 'delivered') {
-      order.deliveryTime = new Date();
-    }
-
-    this.dataService.updateOrder(order);
-    return true;
   }
 
   assignCourierToOrder(orderId: string, courierId: string): boolean {
-    const orders = this.dataService.getOrders();
-    const order = orders.find(o => o.id === orderId);
-    const courier = this.dataService.getUserById(courierId);
-    
-    if (!order || !courier || order.status !== 'ready') return false;
-
-    order.courierId = courierId;
-    order.courierName = courier.name || 'Bilinmeyen Kurye';
-    order.status = 'on_the_way';
-
-    this.dataService.updateOrder(order);
-    return true;
-  }
-
-  private generateOrderId(): string {
-    return 'ORDER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return this.updateOrderStatus(orderId, 'onTheWay', courierId);
   }
 }

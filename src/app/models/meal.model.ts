@@ -4,8 +4,7 @@ export interface Meal {
   name: string;
   price: number;
   description: string;
+  image?: string;
   category?: string;
-  imageUrl?: string;
-  isAvailable: boolean;
-  preparationTime?: number;
+  available?: boolean;
 }
