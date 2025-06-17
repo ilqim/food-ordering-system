@@ -1,0 +1,146 @@
+<header class="app-header">
+  <div class="header-container">
+    <!-- Logo ve Uygulama Adı -->
+    <div class="logo-section">
+      <div class="logo">
+        <i class="icon-utensils">🍽️</i>
+      </div>
+      <h1 class="app-title" [routerLink]="getHomeRoute()" [class.clickable]="isLoggedIn">
+        YemekSepeti
+      </h1>
+    </div>
+
+    <!-- Navigasyon Menüsü -->
+    <nav class="nav-menu" *ngIf="isLoggedIn">
+      <!-- Müşteri Navigasyonu -->
+      <div *ngIf="currentUser?.role === 'customer'" class="nav-links">
+        <a routerLink="/home" routerLinkActive="active" class="nav-link">
+          <i class="icon">🏠</i>
+          <span>Ana Sayfa</span>
+        </a>
+        <a routerLink="/cart" routerLinkActive="active" class="nav-link cart-link">
+          <i class="icon">🛒</i>
+          <span>Sepetim</span>
+          <span *ngIf="cartItemCount > 0" class="cart-badge">{{ cartItemCount }}</span>
+        </a>
+        <a routerLink="/orders" routerLinkActive="active" class="nav-link">
+          <i class="icon">📋</i>
+          <span>Siparişlerim</span>
+        </a>
+      </div>
+
+      <!-- Restoran Navigasyonu -->
+      <div *ngIf="currentUser?.role === 'restaurant'" class="nav-links">
+        <a routerLink="/restaurant-panel" routerLinkActive="active" class="nav-link">
+          <i class="icon">🏪</i>
+          <span>Restoran Paneli</span>
+          <span *ngIf="pendingOrdersCount > 0" class="notification-badge">{{ pendingOrdersCount }}</span>
+        </a>
+      </div>
+
+      <!-- Kurye Navigasyonu -->
+      <div *ngIf="currentUser?.role === 'courier'" class="nav-links">
+        <a routerLink="/courier-panel" routerLinkActive="active" class="nav-link">
+          <i class="icon">🚚</i>
+          <span>Kurye Paneli</span>
+          <span *ngIf="assignedOrdersCount > 0" class="notification-badge">{{ assignedOrdersCount }}</span>
+        </a>
+      </div>
+
+      <!-- Admin Navigasyonu -->
+      <div *ngIf="currentUser?.role === 'admin'" class="nav-links">
+        <a routerLink="/admin-panel" routerLinkActive="active" class="nav-link">
+          <i class="icon">⚙️</i>
+          <span>Yönetim Paneli</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Kullanıcı Menüsü -->
+    <div class="user-section">
+      <div *ngIf="!isLoggedIn" class="auth-buttons">
+        <button class="btn-login" routerLink="/login">
+          <i class="icon">🔑</i>
+          Giriş Yap
+        </button>
+      </div>
+
+      <div *ngIf="isLoggedIn" class="user-menu">
+        <!-- Kullanıcı Bilgileri -->
+        <div class="user-info" (click)="toggleUserDropdown()">
+          <div class="user-avatar">
+            <i class="icon">👤</i>
+          </div>
+          <div class="user-details">
+            <span class="user-name">{{ currentUser?.username }}</span>
+            <span class="user-role">{{ getUserRoleText() }}</span>
+          </div>
+          <i class="dropdown-arrow" [class.open]="showUserDropdown">▼</i>
+        </div>
+
+        <!-- Dropdown Menü -->
+        <div class="user-dropdown" *ngIf="showUserDropdown">
+          <div class="dropdown-item" (click)="showProfile()">
+            <i class="icon">👤</i>
+            <span>Profil</span>
+          </div>
+          <div class="dropdown-item" (click)="showSettings()">
+            <i class="icon">⚙️</i>
+            <span>Ayarlar</span>
+          </div>
+          <hr class="dropdown-divider">
+          <div class="dropdown-item logout" (click)="logout()">
+            <i class="icon">🚪</i>
+            <span>Çıkış Yap</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobil Menü -->
+  <div class="mobile-menu" *ngIf="isLoggedIn">
+    <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+
+    <div class="mobile-nav" *ngIf="showMobileMenu" [@slideDown]>
+      <!-- Müşteri Mobil Menü -->
+      <div *ngIf="currentUser?.role === 'customer'" class="mobile-nav-links">
+        <a routerLink="/home" class="mobile-nav-link" (click)="closeMobileMenu()">
+          <i class="icon">🏠</i>
+          <span>Ana Sayfa</span>
+        </a>
+        <a routerLink="/cart" class="mobile-nav-link" (click)="closeMobileMenu()">
+          <i class="icon">🛒</i>
+          <span>Sepetim</span>
+          <span *ngIf="cartItemCount > 0" class="mobile-badge">{{ cartItemCount }}</span>
+        </a>
+        <a routerLink="/orders" class="mobile-nav-link" (click)="closeMobileMenu()">
+          <i class="icon">📋</i>
+          <span>Siparişlerim</span>
+        </a>
+      </div>
+
+      <!-- Restoran Mobil Menü -->
+      <div *ngIf="currentUser?.role === 'restaurant'" class="mobile-nav-links">
+        <a routerLink="/restaurant-panel" class="mobile-nav-link" (click)="closeMobileMenu()">
+          <i class="icon">🏪</i>
+          <span>Restoran Paneli</span>
+          <span *ngIf="pendingOrdersCount > 0" class="mobile-badge">{{ pendingOrdersCount }}</span>
+        </a>
+      </div>
+
+      <!-- Kurye Mobil Menü -->
+      <div *ngIf="currentUser?.role === 'courier'" class="mobile-nav-links">
+        <a routerLink="/courier-panel" class="mobile-nav-link" (click)="closeMobileMenu()">
+          <i class="icon">🚚</i>
+          <span>Kurye Paneli</span>
+          <span *ngIf="assignedOrdersCount > 0" class="mobile-badge">{{ assignedOrdersCount }}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

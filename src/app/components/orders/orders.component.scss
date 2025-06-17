@@ -1,0 +1,439 @@
+.orders-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+
+  h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 300;
+  }
+
+  .orders-filter {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    .filter-btn {
+      padding: 10px 20px;
+      border: 2px solid #e9ecef;
+      background: white;
+      border-radius: 25px;
+      color: #6c757d;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: #3498db;
+        color: #3498db;
+      }
+
+      &.active {
+        background: #3498db;
+        border-color: #3498db;
+        color: white;
+      }
+    }
+  }
+
+  .orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .order-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border-left: 4px solid #bdc3c7;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    &.status-pending {
+      border-left-color: #f39c12;
+    }
+
+    &.status-inProgress {
+      border-left-color: #3498db;
+    }
+
+    &.status-readyForDelivery {
+      border-left-color: #9b59b6;
+    }
+
+    &.status-onTheWay {
+      border-left-color: #e74c3c;
+    }
+
+    &.status-delivered {
+      border-left-color: #27ae60;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+
+      .order-info {
+        .order-id {
+          color: #2c3e50;
+          margin: 0 0 5px 0;
+          font-size: 1.3rem;
+          font-weight: 600;
+        }
+
+        .order-date {
+          color: #6c757d;
+          font-size: 0.9rem;
+        }
+      }
+
+      .order-status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+
+        &.status-pending {
+          background: #fff3cd;
+          color: #856404;
+        }
+
+        &.status-inProgress {
+          background: #cce7ff;
+          color: #004085;
+        }
+
+        &.status-readyForDelivery {
+          background: #e2c5f0;
+          color: #6f2c91;
+        }
+
+        &.status-onTheWay {
+          background: #f8d7da;
+          color: #721c24;
+        }
+
+        &.status-delivered {
+          background: #d4edda;
+          color: #155724;
+        }
+      }
+    }
+
+    .restaurant-info {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e9ecef;
+
+      h4 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+    }
+
+    .order-items {
+      margin-bottom: 20px;
+
+      .items-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+
+        .items-title {
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .items-count {
+          color: #6c757d;
+          font-size: 0.9rem;
+        }
+      }
+
+      .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f8f9fa;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .item-name {
+          flex: 1;
+          color: #495057;
+          font-weight: 500;
+        }
+
+        .item-quantity {
+          color: #6c757d;
+          margin: 0 15px;
+          font-weight: 500;
+        }
+
+        .item-price {
+          color: #27ae60;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .delivery-info {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+
+      .delivery-address,
+      .delivery-courier {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        i {
+          color: #6c757d;
+          margin-right: 10px;
+          width: 16px;
+        }
+
+        span {
+          color: #495057;
+          font-size: 0.9rem;
+        }
+      }
+    }
+
+    .order-timeline {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        height: 2px;
+        background: #e9ecef;
+        z-index: 0;
+      }
+
+      .timeline-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+
+        .timeline-dot {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #e9ecef;
+          border: 3px solid white;
+          margin-bottom: 8px;
+          transition: background 0.2s ease;
+        }
+
+        span {
+          font-size: 0.8rem;
+          color: #6c757d;
+          text-align: center;
+          font-weight: 500;
+        }
+
+        &.completed {
+          .timeline-dot {
+            background: #27ae60;
+          }
+
+          span {
+            color: #27ae60;
+          }
+        }
+      }
+    }
+
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 20px;
+      border-top: 2px solid #e9ecef;
+
+      .order-total {
+        .total-label {
+          color: #6c757d;
+          font-size: 0.9rem;
+          margin-right: 10px;
+        }
+
+        .total-amount {
+          font-size: 1.4rem;
+          font-weight: bold;
+          color: #27ae60;
+        }
+      }
+
+      .order-actions {
+        display: flex;
+        gap: 10px;
+
+        .btn {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 8px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-size: 0.9rem;
+
+          &.btn-primary {
+            background: #3498db;
+            color: white;
+
+            &:hover {
+              background: #2980b9;
+            }
+          }
+
+          &.btn-secondary {
+            background: #6c757d;
+            color: white;
+
+            &:hover {
+              background: #5a6268;
+            }
+          }
+
+          &.btn-danger {
+            background: #e74c3c;
+            color: white;
+
+            &:hover {
+              background: #c0392b;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      color: #bdc3c7;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #495057;
+    }
+
+    .empty-description {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+
+      &:hover {
+        background: #2980b9;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .orders-container {
+    padding: 15px;
+
+    .order-card {
+      padding: 20px;
+
+      .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .order-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+
+        .order-total {
+          text-align: center;
+        }
+
+        .order-actions {
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+      }
+
+      .order-timeline {
+        flex-direction: column;
+        gap: 15px;
+
+        &::before {
+          display: none;
+        }
+
+        .timeline-item {
+          flex-direction: row;
+          justify-content: flex-start;
+          text-align: left;
+
+          .timeline-dot {
+            margin-right: 10px;
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}

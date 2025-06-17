@@ -1,0 +1,116 @@
+<div class="orders-container">
+  <h1>Siparişlerim</h1>
+  
+  <div class="orders-filter">
+    <button 
+      *ngFor="let status of statusFilters" 
+      [class]="'filter-btn ' + (selectedStatus === status.value ? 'active' : '')"
+      (click)="filterOrders(status.value)">
+      {{ status.label }}
+    </button>
+  </div>
+
+  <div class="orders-list" *ngIf="filteredOrders.length > 0">
+    <div class="order-card" *ngFor="let order of filteredOrders" [class]="'status-' + order.status">
+      <div class="order-header">
+        <div class="order-info">
+          <h3 class="order-id">Sipariş #{{ order.id }}</h3>
+          <span class="order-date">{{ formatDate(order.createdAt) }}</span>
+        </div>
+        <div class="order-status-badge" [class]="'status-' + order.status">
+          {{ getStatusText(order.status) }}
+        </div>
+      </div>
+
+      <div class="restaurant-info">
+        <h4>{{ getRestaurantName(order.restaurantId) }}</h4>
+      </div>
+
+      <div class="order-items">
+        <div class="items-header">
+          <span class="items-title">Sipariş Detayları</span>
+          <span class="items-count">{{ getTotalItemCount(order.items) }} ürün</span>
+        </div>
+        <div class="item" *ngFor="let item of order.items">
+          <span class="item-name">{{ getMealName(item.mealId) }}</span>
+          <span class="item-quantity">{{ item.quantity }}x</span>
+          <span class="item-price">{{ getMealPrice(item.mealId) * item.quantity | currency:'TRY':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="delivery-info" *ngIf="order.address">
+        <div class="delivery-address">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>{{ order.address }}</span>
+        </div>
+        <div class="delivery-courier" *ngIf="order.courierId">
+          <i class="fas fa-motorcycle"></i>
+          <span>Kurye: {{ getCourierName(order.courierId) }}</span>
+        </div>
+      </div>
+
+      <div class="order-timeline" *ngIf="order.status !== 'pending'">
+        <div class="timeline-item" [class]="{ 'completed': isStatusCompleted('pending', order.status) }">
+          <div class="timeline-dot"></div>
+          <span>Sipariş Alındı</span>
+        </div>
+        <div class="timeline-item" [class]="{ 'completed': isStatusCompleted('inProgress', order.status) }">
+          <div class="timeline-dot"></div>
+          <span>Hazırlanıyor</span>
+        </div>
+        <div class="timeline-item" [class]="{ 'completed': isStatusCompleted('readyForDelivery', order.status) }">
+          <div class="timeline-dot"></div>
+          <span>Teslimata Hazır</span>
+        </div>
+        <div class="timeline-item" [class]="{ 'completed': isStatusCompleted('onTheWay', order.status) }">
+          <div class="timeline-dot"></div>
+          <span>Yolda</span>
+        </div>
+        <div class="timeline-item" [class]="{ 'completed': isStatusCompleted('delivered', order.status) }">
+          <div class="timeline-dot"></div>
+          <span>Teslim Edildi</span>
+        </div>
+      </div>
+
+      <div class="order-footer">
+        <div class="order-total">
+          <span class="total-label">Toplam Tutar:</span>
+          <span class="total-amount">{{ order.totalPrice | currency:'TRY':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="order-actions">
+          <button 
+            class="btn btn-secondary" 
+            *ngIf="order.status === 'delivered'"
+            (click)="reorderItems(order)">
+            Tekrar Sipariş Ver
+          </button>
+          <button 
+            class="btn btn-danger" 
+            *ngIf="order.status === 'pending'"
+            (click)="cancelOrder(order.id)">
+            İptal Et
+          </button>
+          <button 
+            class="btn btn-primary" 
+            *ngIf="order.status === 'delivered'"
+            (click)="rateOrder(order.id)">
+            Değerlendir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="filteredOrders.length === 0">
+    <div class="empty-icon">
+      <i class="fas fa-shopping-bag"></i>
+    </div>
+    <h3 class="empty-title">{{ getEmptyStateMessage() }}</h3>
+    <p class="empty-description">
+      {{ selectedStatus === 'all' ? 'Henüz hiç sipariş vermediniz.' : 'Bu durumda sipariş bulunmamaktadır.' }}
+    </p>
+    <button class="btn btn-primary" routerLink="/home" *ngIf="selectedStatus === 'all'">
+      Sipariş Vermeye Başla
+    </button>
+  </div>
+</div>

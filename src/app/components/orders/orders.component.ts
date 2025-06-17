@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { DataService } from '../../services/data.service';
-import { AuthService } from '../../services/auth.service';
 import { Order, User, Meal } from '../../models';
+import { AuthService } from '../../services/auth.service';
+import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-orders',
@@ -13,82 +13,60 @@ import { Order, User, Meal } from '../../models';
   styleUrls: ['./orders.component.scss']
 })
 export class OrdersComponent implements OnInit {
-  currentUser: User | null = null;
   orders: Order[] = [];
+  currentUser: User | null = null;
   meals: Meal[] = [];
-  users: User[] = [];
-  selectedTab = 'active';
-
-  activeOrders: Order[] = [];
-  completedOrders: Order[] = [];
+  restaurants: User[] = [];
 
   constructor(
-    private dataService: DataService,
     private authService: AuthService,
+    private dataService: DataService,
     private router: Router
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
-    if (!this.currentUser || this.currentUser.role !== 'customer') {
+    if (!this.currentUser) {
       this.router.navigate(['/login']);
       return;
     }
-    
+
     this.loadData();
   }
 
-  loadData() {
-    // Sadece current user'ın siparişlerini getir
-    const allOrders = this.dataService.getOrders();
-    this.orders = allOrders.filter(order => order.customerId === this.currentUser?.id);
-    
+  loadData(): void {
     this.meals = this.dataService.getMeals();
-    this.users = this.dataService.getUsers();
+    this.restaurants = this.dataService.getUsers().filter(u => u.role === 'restaurant');
     
-    // Siparişleri durumlarına göre ayır
-    this.activeOrders = this.orders.filter(order => 
-      ['pending', 'inProgress', 'readyForDelivery', 'onTheWay'].includes(order.status)
-    );
-    
-    this.completedOrders = this.orders.filter(order => 
-      order.status === 'delivered'
-    );
-
-    // Tarihe göre sırala (en yeni üstte)
-    this.activeOrders.sort((a, b) => 
-      new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
-    );
-    
-    this.completedOrders.sort((a, b) => 
-      new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
-    );
+    if (this.currentUser?.role === 'customer') {
+      this.orders = this.dataService.getOrders().filter(order => order.customerId === this.currentUser?.id);
+    } else {
+      this.orders = this.dataService.getOrders();
+    }
   }
 
-  getMealById(id: string): Meal | undefined {
-    return this.meals.find(meal => meal.id === id);
-  }
-
-  getUserById(id: string): User | undefined {
-    return this.users.find(user => user.id === id);
+  getMealName(mealId: string): string {
+    const meal = this.meals.find(m => m.id === mealId);
+    return meal ? meal.name : 'Bilinmeyen Ürün';
   }
 
   getRestaurantName(restaurantId: string): string {
-    const restaurant = this.getUserById(restaurantId);
-    return restaurant?.username || 'Bilinmeyen Restoran';
+    const restaurant = this.restaurants.find(r => r.id === restaurantId);
+    return restaurant ? restaurant.username : 'Bilinmeyen Restoran';
   }
 
-  getCourierName(courierId: string): string {
-    if (!courierId) return 'Atanmadı';
-    const courier = this.getUserById(courierId);
-    return courier?.username || 'Bilinmeyen Kurye';
+  getOrderTotal(order: Order): number {
+    return order.items.reduce((total, item) => {
+      const meal = this.meals.find(m => m.id === item.mealId);
+      return total + (meal ? meal.price * item.quantity : 0);
+    }, 0);
   }
 
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'pending': 'Beklemede',
+      'pending': 'Bekliyor',
       'inProgress': 'Hazırlanıyor',
-      'readyForDelivery': 'Teslime Hazır',
+      'readyForDelivery': 'Teslimat İçin Hazır',
       'onTheWay': 'Yolda',
       'delivered': 'Teslim Edildi'
     };
@@ -96,53 +74,18 @@ export class OrdersComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    const classMap: { [key: string]: string } = {
+    const statusClasses: { [key: string]: string } = {
       'pending': 'status-pending',
       'inProgress': 'status-progress',
       'readyForDelivery': 'status-ready',
-      'onTheWay': 'status-way',
+      'onTheWay': 'status-ontheway',
       'delivered': 'status-delivered'
     };
-    return classMap[status] || '';
-  }
-
-  getStatusIcon(status: string): string {
-    const iconMap: { [key: string]: string } = {
-      'pending': '⏳',
-      'inProgress': '👨‍🍳',
-      'readyForDelivery': '📦',
-      'onTheWay': '🚗',
-      'delivered': '✅'
-    };
-    return iconMap[status] || '📋';
+    return statusClasses[status] || '';
   }
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleString('tr-TR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
-  reorderItems(order: Order) {
-    // Siparişi tekrar sepete ekle
-    order.items.forEach(item => {
-      // CartService'e ekleme mantığı burada olacak
-      // Şimdilik basit alert gösterelim
-    });
-    alert('Ürünler sepete eklendi! Sepete gidebilirsiniz.');
-    this.router.navigate(['/cart']);
-  }
-
-  goToHome() {
-    this.router.navigate(['/home']);
-  }
-
-  refreshOrders() {
-    this.loadData();
+    return date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
   }
 }

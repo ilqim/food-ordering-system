@@ -1,0 +1,188 @@
+<div class="restaurant-panel">
+  <div class="panel-header">
+    <h1>Restoran Paneli</h1>
+    <p>Hoş geldin, {{ currentUser?.username }}!</p>
+  </div>
+
+  <div class="tabs">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'meals'"
+      (click)="activeTab = 'meals'">
+      Menü Yönetimi
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'orders'"
+      (click)="activeTab = 'orders'">
+      Siparişler ({{ pendingOrdersCount }})
+    </button>
+  </div>
+
+  <!-- Menü Yönetimi Tab -->
+  <div *ngIf="activeTab === 'meals'" class="tab-content">
+    <div class="meals-section">
+      <div class="section-header">
+        <h2>Yemek Menüsü</h2>
+        <button class="btn-primary" (click)="showAddMealForm = !showAddMealForm">
+          {{ showAddMealForm ? 'İptal' : 'Yeni Yemek Ekle' }}
+        </button>
+      </div>
+
+      <!-- Yemek Ekleme Formu -->
+      <div *ngIf="showAddMealForm" class="meal-form">
+        <h3>{{ editingMeal ? 'Yemek Düzenle' : 'Yeni Yemek Ekle' }}</h3>
+        <form (ngSubmit)="saveMeal()">
+          <div class="form-group">
+            <label for="mealName">Yemek Adı:</label>
+            <input 
+              type="text" 
+              id="mealName" 
+              [(ngModel)]="mealForm.name" 
+              name="mealName"
+              required>
+          </div>
+          
+          <div class="form-group">
+            <label for="mealPrice">Fiyat (₺):</label>
+            <input 
+              type="number" 
+              id="mealPrice" 
+              [(ngModel)]="mealForm.price" 
+              name="mealPrice"
+              min="0" 
+              step="0.5" 
+              required>
+          </div>
+          
+          <div class="form-group">
+            <label for="mealDescription">Açıklama:</label>
+            <textarea 
+              id="mealDescription" 
+              [(ngModel)]="mealForm.description" 
+              name="mealDescription"
+              rows="3">
+            </textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="mealImage">Resim URL:</label>
+            <input 
+              type="url" 
+              id="mealImage" 
+              [(ngModel)]="mealForm.imageUrl" 
+              name="mealImage"
+              placeholder="https://...">
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">
+              {{ editingMeal ? 'Güncelle' : 'Ekle' }}
+            </button>
+            <button type="button" class="btn-secondary" (click)="cancelEdit()">
+              İptal
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Yemek Listesi -->
+      <div class="meals-grid">
+        <div *ngFor="let meal of restaurantMeals" class="meal-item">
+          <div class="meal-image">
+            <img [src]="meal.imageUrl || '/assets/default-meal.jpg'" [alt]="meal.name">
+          </div>
+          <div class="meal-info">
+            <h4>{{ meal.name }}</h4>
+            <p class="meal-description">{{ meal.description }}</p>
+            <div class="meal-price">{{ meal.price }} ₺</div>
+          </div>
+          <div class="meal-actions">
+            <button class="btn-edit" (click)="editMeal(meal)">Düzenle</button>
+            <button class="btn-delete" (click)="deleteMeal(meal.id)">Sil</button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="restaurantMeals.length === 0" class="empty-state">
+        <p>Henüz menünüzde yemek bulunmuyor. İlk yemeğinizi ekleyin!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Siparişler Tab -->
+  <div *ngIf="activeTab === 'orders'" class="tab-content">
+    <div class="orders-section">
+      <h2>Gelen Siparişler</h2>
+      
+      <div class="orders-filter">
+        <button 
+          *ngFor="let status of orderStatuses" 
+          class="filter-btn"
+          [class.active]="selectedStatus === status.key"
+          (click)="selectedStatus = status.key">
+          {{ status.label }} ({{ getOrderCountByStatus(status.key) }})
+        </button>
+      </div>
+
+      <div class="orders-list">
+        <div *ngFor="let order of filteredOrders" class="order-card">
+          <div class="order-header">
+            <div class="order-id">Sipariş #{{ order.id.substring(0, 8) }}</div>
+            <div class="order-status" [class]="getStatusClass(order.status)">
+              {{ getStatusText(order.status) }}
+            </div>
+            <div class="order-date">{{ formatDate(order.createdAt) }}</div>
+          </div>
+          
+          <div class="order-details">
+            <div class="customer-info">
+              <strong>Müşteri:</strong> {{ getCustomerName(order.customerId) }}
+            </div>
+            <div class="delivery-address">
+              <strong>Adres:</strong> {{ order.address }}
+            </div>
+            
+            <div class="order-items">
+              <h4>Sipariş Detayları:</h4>
+              <ul>
+                <li *ngFor="let item of order.items">
+                  {{ getMealName(item.mealId) }} x{{ item.quantity }}
+                </li>
+              </ul>
+            </div>
+            
+            <div class="order-total">
+              <strong>Toplam: {{ getOrderTotal(order) }} ₺</strong>
+            </div>
+          </div>
+          
+          <div class="order-actions">
+            <button 
+              *ngIf="order.status === 'pending'" 
+              class="btn-accept" 
+              (click)="updateOrderStatus(order.id, 'inProgress')">
+              Siparişi Kabul Et
+            </button>
+            <button 
+              *ngIf="order.status === 'inProgress'" 
+              class="btn-ready" 
+              (click)="updateOrderStatus(order.id, 'readyForDelivery')">
+              Hazır - Teslimat İçin
+            </button>
+            <button 
+              *ngIf="order.status === 'pending'" 
+              class="btn-reject" 
+              (click)="updateOrderStatus(order.id, 'rejected')">
+              Reddet
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="filteredOrders.length === 0" class="empty-state">
+        <p>{{ selectedStatus === 'all' ? 'Henüz sipariş bulunmuyor.' : 'Bu durumda sipariş bulunmuyor.' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
