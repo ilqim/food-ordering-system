@@ -1,0 +1,96 @@
+<div class="cart-container">
+  <div class="cart-header">
+    <h2>Sepetim</h2>
+    <button class="btn-secondary" (click)="continueShopping()">
+      Alışverişe Devam Et
+    </button>
+  </div>
+
+  <div class="cart-content" *ngIf="cart && cart.items.length > 0; else emptyCart">
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cart.items">
+        <div class="item-info" *ngIf="getMealById(item.mealId) as meal">
+          <img [src]="meal.image || 'assets/default-meal.jpg'" [alt]="meal.name" class="item-image">
+          <div class="item-details">
+            <h4>{{ meal.name }}</h4>
+            <p class="item-description">{{ meal.description }}</p>
+            <p class="item-price">{{ meal.price }}₺</p>
+          </div>
+        </div>
+        
+        <div class="quantity-controls">
+          <button class="quantity-btn" (click)="updateQuantity(item.mealId, item.quantity - 1)">-</button>
+          <span class="quantity">{{ item.quantity }}</span>
+          <button class="quantity-btn" (click)="updateQuantity(item.mealId, item.quantity + 1)">+</button>
+        </div>
+        
+        <div class="item-total">
+          {{ (getMealById(item.mealId)?.price || 0) * item.quantity }}₺
+        </div>
+        
+        <button class="remove-btn" (click)="removeFromCart(item.mealId)">
+          🗑️
+        </button>
+      </div>
+    </div>
+
+    <div class="order-form">
+      <h3>Sipariş Bilgileri</h3>
+      
+      <div class="form-group">
+        <label for="address">Teslimat Adresi *</label>
+        <textarea 
+          id="address" 
+          [(ngModel)]="address" 
+          placeholder="Adresinizi giriniz..."
+          rows="3"
+          required>
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="paymentType">Ödeme Türü</label>
+        <select id="paymentType" [(ngModel)]="paymentType">
+          <option value="cash">Nakit</option>
+          <option value="card">Kredi Kartı</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="orderNote">Sipariş Notu</label>
+        <textarea 
+          id="orderNote" 
+          [(ngModel)]="orderNote" 
+          placeholder="İsteğe bağlı sipariş notunuz..."
+          rows="2">
+        </textarea>
+      </div>
+    </div>
+
+    <div class="cart-summary">
+      <div class="total-price">
+        <strong>Toplam: {{ totalPrice }}₺</strong>
+      </div>
+      
+      <div class="cart-actions">
+        <button class="btn-danger" (click)="clearCart()">
+          Sepeti Temizle
+        </button>
+        <button class="btn-primary" (click)="placeOrder()">
+          Sipariş Ver
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #emptyCart>
+    <div class="empty-cart">
+      <div class="empty-cart-icon">🛒</div>
+      <h3>Sepetiniz boş</h3>
+      <p>Lezzetli yemekler eklemek için alışverişe başlayın!</p>
+      <button class="btn-primary" (click)="continueShopping()">
+        Alışverişe Başla
+      </button>
+    </div>
+  </ng-template>
+</div>

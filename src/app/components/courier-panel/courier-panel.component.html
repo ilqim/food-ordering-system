@@ -1,0 +1,163 @@
+<div class="courier-panel">
+  <div class="panel-header">
+    <div class="header-content">
+      <h1>Kurye Paneli</h1>
+      <div class="user-info">
+        <span>Hoş geldin, {{ currentUser?.username }}</span>
+        <button class="btn-secondary" (click)="logout()">Çıkış</button>
+      </div>
+    </div>
+    
+    <div class="tabs">
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedTab === 'assigned'"
+        (click)="selectedTab = 'assigned'">
+        Atanan Siparişler ({{ assignedOrders.length }})
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="selectedTab === 'available'"
+        (click)="selectedTab = 'available'">
+        Müsait Siparişler ({{ availableOrders.length }})
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-content">
+    <!-- Atanan Siparişler -->
+    <div *ngIf="selectedTab === 'assigned'" class="orders-section">
+      <div *ngIf="assignedOrders.length === 0" class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>Henüz atanmış siparişiniz yok</h3>
+        <p>Müsait siparişler sekmesinden sipariş alabilirsiniz.</p>
+      </div>
+
+      <div class="orders-grid" *ngIf="assignedOrders.length > 0">
+        <div class="order-card" *ngFor="let order of assignedOrders">
+          <div class="order-header">
+            <div class="order-id">Sipariş #{{ order.id }}</div>
+            <div class="order-status" [ngClass]="getStatusClass(order.status)">
+              {{ getStatusText(order.status) }}
+            </div>
+          </div>
+
+          <div class="order-info">
+            <div class="info-row">
+              <strong>Restoran:</strong>
+              <span>{{ getRestaurantName(order.restaurantId) }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Müşteri:</strong>
+              <span>{{ getCustomerName(order.customerId) }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Adres:</strong>
+              <span>{{ order.address }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Toplam:</strong>
+              <span class="price">{{ order.totalPrice }}₺</span>
+            </div>
+            <div class="info-row" *ngIf="order.orderNote">
+              <strong>Not:</strong>
+              <span>{{ order.orderNote }}</span>
+            </div>
+          </div>
+
+          <div class="order-items">
+            <h4>Sipariş İçeriği</h4>
+            <div class="item-list">
+              <div class="item" *ngFor="let item of order.items">
+                <span *ngIf="getMealById(item.mealId) as meal">
+                  {{ item.quantity }}x {{ meal.name }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-actions">
+            <button 
+              *ngIf="order.status === 'readyForDelivery'"
+              class="btn-primary"
+              (click)="updateOrderStatus(order.id, 'onTheWay')">
+              Teslimata Çık
+            </button>
+            <button 
+              *ngIf="order.status === 'onTheWay'"
+              class="btn-success"
+              (click)="updateOrderStatus(order.id, 'delivered')">
+              Teslim Edildi
+            </button>
+          </div>
+
+          <div class="order-date">
+            Sipariş Tarihi: {{ formatDate(order.createdAt || '') }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Müsait Siparişler -->
+    <div *ngIf="selectedTab === 'available'" class="orders-section">
+      <div *ngIf="availableOrders.length === 0" class="empty-state">
+        <div class="empty-icon">✅</div>
+        <h3>Şu anda müsait sipariş yok</h3>
+        <p>Yeni siparişler hazır olduğunda burada görünecek.</p>
+      </div>
+
+      <div class="orders-grid" *ngIf="availableOrders.length > 0">
+        <div class="order-card available" *ngFor="let order of availableOrders">
+          <div class="order-header">
+            <div class="order-id">Sipariş #{{ order.id }}</div>
+            <div class="order-status" [ngClass]="getStatusClass(order.status)">
+              {{ getStatusText(order.status) }}
+            </div>
+          </div>
+
+          <div class="order-info">
+            <div class="info-row">
+              <strong>Restoran:</strong>
+              <span>{{ getRestaurantName(order.restaurantId) }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Müşteri:</strong>
+              <span>{{ getCustomerName(order.customerId) }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Adres:</strong>
+              <span>{{ order.address }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Toplam:</strong>
+              <span class="price">{{ order.totalPrice }}₺</span>
+            </div>
+          </div>
+
+          <div class="order-items">
+            <h4>Sipariş İçeriği</h4>
+            <div class="item-list">
+              <div class="item" *ngFor="let item of order.items">
+                <span *ngIf="getMealById(item.mealId) as meal">
+                  {{ item.quantity }}x {{ meal.name }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-actions">
+            <button 
+              class="btn-primary"
+              (click)="acceptOrder(order.id)">
+              Siparişi Al
+            </button>
+          </div>
+
+          <div class="order-date">
+            Sipariş Tarihi: {{ formatDate(order.createdAt || '') }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
