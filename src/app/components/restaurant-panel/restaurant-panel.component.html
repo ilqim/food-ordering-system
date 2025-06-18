@@ -70,7 +70,7 @@
             <input 
               type="url" 
               id="mealImage" 
-              [(ngModel)]="mealForm.imageUrl" 
+              [(ngModel)]="mealForm.image"
               name="mealImage"
               placeholder="https://...">
           </div>
@@ -90,7 +90,7 @@
       <div class="meals-grid">
         <div *ngFor="let meal of restaurantMeals" class="meal-item">
           <div class="meal-image">
-            <img [src]="meal.imageUrl || '/assets/default-meal.jpg'" [alt]="meal.name">
+            <img [src]="meal.image || '/assets/default-meal.jpg'" [alt]="meal.name">
           </div>
           <div class="meal-info">
             <h4>{{ meal.name }}</h4>
@@ -132,7 +132,7 @@
             <div class="order-status" [class]="getStatusClass(order.status)">
               {{ getStatusText(order.status) }}
             </div>
-            <div class="order-date">{{ formatDate(order.createdAt) }}</div>
+            <div class="order-date">{{ formatDate(order.orderDate) }}</div>
           </div>
           
           <div class="order-details">
@@ -173,7 +173,7 @@
             <button 
               *ngIf="order.status === 'pending'" 
               class="btn-reject" 
-              (click)="updateOrderStatus(order.id, 'rejected')">
+              (click)="updateOrderStatus(order.id, 'cancelled')">
               Reddet
             </button>
           </div>
