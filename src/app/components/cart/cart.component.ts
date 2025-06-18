@@ -6,11 +6,12 @@ import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
 import { Cart, CartItem } from '../../models';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmDialogComponent],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss']
 })
@@ -24,6 +25,9 @@ export class CartComponent implements OnInit {
   paymentType: 'cash' | 'card' = 'cash';
   
   isPlacingOrder = false;
+
+  confirmMessage = '';
+  pendingMealId: string | null = null;
 
   constructor(
     private cartService: CartService,
@@ -45,16 +49,25 @@ export class CartComponent implements OnInit {
     }
   }
 
-  updateQuantity(mealId: string, quantity: number): void {
+  updateQuantity(mealId: string, quantity: number, mealName?: string): void {
     if (quantity < 1) {
-      this.removeItem(mealId);
+      this.requestRemove(mealId, mealName);
     } else {
       this.cartService.updateQuantity(mealId, quantity);
     }
   }
 
-  removeItem(mealId: string): void {
-    this.cartService.removeFromCart(mealId);
+  requestRemove(mealId: string, mealName?: string): void {
+    this.pendingMealId = mealId;
+    this.confirmMessage = `\u201C${mealName ?? ''}\u201D adlı ürünü sepetten çıkarmak istediğinizden emin misiniz?`;
+  }
+
+  onConfirm(result: boolean): void {
+    if (result && this.pendingMealId) {
+      this.cartService.removeFromCart(this.pendingMealId);
+    }
+    this.pendingMealId = null;
+    this.confirmMessage = '';
   }
 
   clearCart(): void {
