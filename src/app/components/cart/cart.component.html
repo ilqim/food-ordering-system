@@ -36,20 +36,20 @@
               <div class="quantity-controls">
                 <button 
                   class="qty-btn"
-                  (click)="updateQuantity(item.meal.id, item.quantity - 1)"
+                (click)="updateQuantity(item.meal.id, item.quantity - 1, item.meal.name)"
                 >-</button>
                 <span class="quantity">{{ item.quantity }}</span>
                 <button 
                   class="qty-btn"
-                  (click)="updateQuantity(item.meal.id, item.quantity + 1)"
+                (click)="updateQuantity(item.meal.id, item.quantity + 1, item.meal.name)"
                 >+</button>
               </div>
               
               <div class="item-total">₺{{ item.meal.price * item.quantity }}</div>
               
-              <button 
+              <button
                 class="remove-btn"
-                (click)="removeItem(item.meal.id)"
+                (click)="removeItem(item.meal.id, item.meal.name)"
                 title="Sepetten Çıkar"
               >🗑️</button>
             </div>
@@ -158,4 +158,5 @@
       </div>
     </div>
   </ng-template>
+
 </div>

@@ -5,6 +5,7 @@ import { Order, User, Meal, OrderItem } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { DataService } from '../../services/data.service';
 import { CartService } from '../../services/cart.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-orders',
@@ -34,7 +35,8 @@ export class OrdersComponent implements OnInit {
     private authService: AuthService,
     private dataService: DataService,
     private router: Router,
-    private cartService: CartService
+    private cartService: CartService,
+    private notifier: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -140,19 +142,23 @@ export class OrdersComponent implements OnInit {
         this.cartService.addToCart(meal, item.quantity);
       }
     });
-    alert('Ürünler sepete eklendi');
+    this.notifier.notify('Ürünler sepete eklendi');
   }
 
   cancelOrder(orderId: string): void {
-    if (confirm('Siparişi iptal etmek istiyor musunuz?')) {
-      this.dataService.updateOrderStatus(orderId, 'cancelled');
-      this.loadData();
-      this.filterOrders(this.selectedStatus);
-    }
+    this.notifier
+      .confirm('Siparişi iptal etmek istiyor musunuz?')
+      .then(result => {
+        if (result) {
+          this.dataService.updateOrderStatus(orderId, 'cancelled');
+          this.loadData();
+          this.filterOrders(this.selectedStatus);
+        }
+      });
   }
 
   rateOrder(orderId: string): void {
-    alert('Sipariş değerlendirme özelliği henüz uygulanmadı.');
+    this.notifier.notify('Sipariş değerlendirme özelliği henüz uygulanmadı.');
   }
 
   getEmptyStateMessage(): string {
@@ -196,19 +202,23 @@ export class OrdersComponent implements OnInit {
         this.cartService.addToCart(meal, item.quantity);
       }
     });
-    alert('Ürünler sepete eklendi');
+    this.notifier.notify('Ürünler sepete eklendi');
   }
 
   cancelOrder(orderId: string): void {
-    if (confirm('Siparişi iptal etmek istiyor musunuz?')) {
-      this.dataService.updateOrderStatus(orderId, 'cancelled');
-      this.loadData();
-      this.filterOrders(this.selectedStatus);
-    }
+    this.notifier
+      .confirm('Siparişi iptal etmek istiyor musunuz?')
+      .then(result => {
+        if (result) {
+          this.dataService.updateOrderStatus(orderId, 'cancelled');
+          this.loadData();
+          this.filterOrders(this.selectedStatus);
+        }
+      });
   }
 
   rateOrder(orderId: string): void {
-    alert('Sipariş değerlendirme özelliği henüz uygulanmadı.');
+    this.notifier.notify('Sipariş değerlendirme özelliği henüz uygulanmadı.');
   }
 
   getEmptyStateMessage(): string {
