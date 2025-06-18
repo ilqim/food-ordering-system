@@ -90,10 +90,9 @@
               Teslim Edildi
             </button>
           </div>
-
-            <div class="order-date">
-              Sipariş Tarihi: {{ formatDate(order.orderDate) }}
-            </div>
+          <div class="order-date">
+            Sipariş Tarihi: {{ formatDate(order.orderDate || '') }}
+          </div>
         </div>
       </div>
     </div>
@@ -152,10 +151,10 @@
               Siparişi Al
             </button>
           </div>
-
-            <div class="order-date">
-              Sipariş Tarihi: {{ formatDate(order.orderDate) }}
-            </div>
+            
+          <div class="order-date">
+            Sipariş Tarihi: {{ formatDate(order.orderDate || '') }}
+          </div>
         </div>
       </div>
     </div>
