@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { User, Meal, Order } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { DataService } from '../../services/data.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-restaurant-panel',
@@ -46,7 +47,8 @@ export class RestaurantPanelComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private dataService: DataService,
-    private router: Router
+    private router: Router,
+    private notifier: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -79,7 +81,7 @@ export class RestaurantPanelComponent implements OnInit {
   // Menü Yönetimi Metodları
   saveMeal(): void {
     if (!this.mealForm.name || !this.mealForm.price) {
-      alert('Lütfen tüm gerekli alanları doldurun!');
+      this.notifier.notify('Lütfen tüm gerekli alanları doldurun!');
       return;
     }
 
@@ -122,10 +124,14 @@ export class RestaurantPanelComponent implements OnInit {
   }
 
   deleteMeal(mealId: string): void {
-    if (confirm('Bu yemeği silmek istediğinizden emin misiniz?')) {
-      this.dataService.deleteMeal(mealId);
-      this.loadMeals();
-    }
+    this.notifier
+      .confirm('Bu yemeği silmek istediğinizden emin misiniz?')
+      .then(result => {
+        if (result) {
+          this.dataService.deleteMeal(mealId);
+          this.loadMeals();
+        }
+      });
   }
 
   cancelEdit(): void {

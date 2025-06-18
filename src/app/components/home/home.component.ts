@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { DataService } from '../../services/data.service';
 import { CartService } from '../../services/cart.service';
+import { NotificationService } from '../../services/notification.service';
 import { User, Meal } from '../../models';
 import { MealCardComponent } from '../shared/meal-card/meal-card.component';
 
@@ -30,7 +31,8 @@ export class HomeComponent implements OnInit {
     private authService: AuthService,
     private dataService: DataService,
     private cartService: CartService,
-    private router: Router
+    private router: Router,
+    private notifier: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -84,19 +86,23 @@ export class HomeComponent implements OnInit {
 
   addToCart(meal: Meal): void {
     if (this.currentUser?.role !== 'customer') {
-      alert('Sadece müşteriler sipariş verebilir!');
+      this.notifier.notify('Sadece müşteriler sipariş verebilir!');
       return;
     }
 
     const success = this.cartService.addToCart(meal);
     if (success) {
-      alert('Ürün sepete eklendi!');
+      this.notifier.notify('Ürün sepete eklendi!');
     } else {
-      if (confirm('Sepetinizde farklı restorandan ürünler var. Sepeti temizleyip bu ürünü eklemek istiyor musunuz?')) {
-        this.cartService.clearCart();
-        this.cartService.addToCart(meal);
-        alert('Sepet temizlendi ve ürün eklendi!');
-      }
+      this.notifier
+        .confirm('Sepetinizde farklı restorandan ürünler var. Sepeti temizleyip bu ürünü eklemek istiyor musunuz?')
+        .then(result => {
+          if (result) {
+            this.cartService.clearCart();
+            this.cartService.addToCart(meal);
+            this.notifier.notify('Sepet temizlendi ve ürün eklendi!');
+          }
+        });
     }
   }
 

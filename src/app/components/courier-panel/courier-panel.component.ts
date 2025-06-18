@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 import { Order, User, Meal } from '../../models';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-courier-panel',
@@ -24,7 +25,8 @@ export class CourierPanelComponent implements OnInit {
   constructor(
     private dataService: DataService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private notifier: NotificationService
   ) { }
 
   ngOnInit() {
@@ -74,10 +76,14 @@ export class CourierPanelComponent implements OnInit {
   }
 
   acceptOrder(orderId: string) {
-    if (confirm('Bu siparişi almak istiyor musunuz?')) {
-      this.dataService.updateOrderStatus(orderId, 'onTheWay', this.currentUser?.id);
-      this.loadData();
-    }
+    this.notifier
+      .confirm('Bu siparişi almak istiyor musunuz?')
+      .then(result => {
+        if (result) {
+          this.dataService.updateOrderStatus(orderId, 'onTheWay', this.currentUser?.id);
+          this.loadData();
+        }
+      });
   }
 
   updateOrderStatus(orderId: string, status: string) {
@@ -86,15 +92,17 @@ export class CourierPanelComponent implements OnInit {
       'delivered': 'Siparişi teslim edildi olarak işaretlemek istediğinizden emin misiniz?'
     };
 
-    if (confirm(statusMessages[status])) {
-      this.dataService.updateOrderStatus(orderId, status as 'pending' | 'inProgress' | 'readyForDelivery' | 'onTheWay' | 'delivered' | 'cancelled');
-
-      this.loadData();
-
-      if (status === 'delivered') {
-        alert('Sipariş başarıyla teslim edildi!');
-      }
-    }
+    this.notifier
+      .confirm(statusMessages[status])
+      .then(result => {
+        if (result) {
+          this.dataService.updateOrderStatus(orderId, status as 'pending' | 'inProgress' | 'readyForDelivery' | 'onTheWay' | 'delivered' | 'cancelled');
+          this.loadData();
+          if (status === 'delivered') {
+            this.notifier.notify('Sipariş başarıyla teslim edildi!');
+          }
+        }
+      });
   }
 
   getStatusText(status: string): string {

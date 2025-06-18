@@ -49,7 +49,7 @@
               
               <button
                 class="remove-btn"
-                (click)="requestRemove(item.meal.id, item.meal.name)"
+                (click)="removeItem(item.meal.id, item.meal.name)"
                 title="Sepetten Çıkar"
               >🗑️</button>
             </div>
@@ -159,9 +159,4 @@
     </div>
   </ng-template>
 
-  <app-confirm-dialog
-    *ngIf="confirmMessage"
-    [message]="confirmMessage"
-    (confirm)="onConfirm($event)"
-  ></app-confirm-dialog>
 </div>

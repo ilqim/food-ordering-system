@@ -6,12 +6,12 @@ import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
 import { Cart, CartItem } from '../../models';
-import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmDialogComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss']
 })
@@ -26,14 +26,13 @@ export class CartComponent implements OnInit {
   
   isPlacingOrder = false;
 
-  confirmMessage = '';
-  pendingMealId: string | null = null;
 
   constructor(
     private cartService: CartService,
     private orderService: OrderService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private notifier: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -51,29 +50,29 @@ export class CartComponent implements OnInit {
 
   updateQuantity(mealId: string, quantity: number, mealName?: string): void {
     if (quantity < 1) {
-      this.requestRemove(mealId, mealName);
+      this.removeItem(mealId, mealName);
     } else {
       this.cartService.updateQuantity(mealId, quantity);
     }
   }
 
-  requestRemove(mealId: string, mealName?: string): void {
-    this.pendingMealId = mealId;
-    this.confirmMessage = `\u201C${mealName ?? ''}\u201D adlı ürünü sepetten çıkarmak istediğinizden emin misiniz?`;
-  }
-
-  onConfirm(result: boolean): void {
-    if (result && this.pendingMealId) {
-      this.cartService.removeFromCart(this.pendingMealId);
-    }
-    this.pendingMealId = null;
-    this.confirmMessage = '';
+  removeItem(mealId: string, mealName?: string): void {
+    this.notifier
+      .confirm(`\u201C${mealName ?? ''}\u201D adlı ürünü sepetten çıkarmak istediğinizden emin misiniz?`)
+      .then(result => {
+        if (result) {
+          this.cartService.removeFromCart(mealId);
+        }
+      });
   }
 
   clearCart(): void {
-    if (confirm('Sepeti tamamen temizlemek istediğinizden emin misiniz?')) {
-      this.cartService.clearCart();
-    }
+    this.notifier.confirm('Sepeti tamamen temizlemek istediğinizden emin misiniz?')
+      .then(result => {
+        if (result) {
+          this.cartService.clearCart();
+        }
+      });
   }
 
   getTotalQuantity(): number {
@@ -82,17 +81,17 @@ export class CartComponent implements OnInit {
 
   placeOrder(): void {
     if (!this.address.trim()) {
-      alert('Lütfen teslimat adresini girin!');
+      this.notifier.notify('Lütfen teslimat adresini girin!');
       return;
     }
 
     if (!this.phone.trim()) {
-      alert('Lütfen telefon numaranızı girin!');
+      this.notifier.notify('Lütfen telefon numaranızı girin!');
       return;
     }
 
     if (this.cart.items.length === 0) {
-      alert('Sepetinizde ürün yok!');
+      this.notifier.notify('Sepetinizde ürün yok!');
       return;
     }
 
@@ -108,10 +107,10 @@ export class CartComponent implements OnInit {
       );
 
       if (orderId) {
-        alert('Siparişiniz başarıyla verildi! Sipariş No: ' + orderId);
+        this.notifier.notify('Siparişiniz başarıyla verildi! Sipariş No: ' + orderId);
         this.router.navigate(['/orders']);
       } else {
-        alert('Sipariş verilirken bir hata oluştu!');
+        this.notifier.notify('Sipariş verilirken bir hata oluştu!');
       }
 
       this.isPlacingOrder = false;
