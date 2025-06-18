@@ -50,7 +50,7 @@ export class CourierPanelComponent implements OnInit {
 
     // Atanmayı bekleyen siparişler
     this.availableOrders = orders.filter(order =>
-      order.status === 'ready' &&
+      order.status === 'readyForDelivery' &&
       (!order.courierId || order.courierId === '')
     );
   }
@@ -87,7 +87,7 @@ export class CourierPanelComponent implements OnInit {
     };
 
     if (confirm(statusMessages[status])) {
-      this.dataService.updateOrderStatus(orderId, status as 'pending' | 'confirmed' | 'preparing' | 'ready' | 'onTheWay' | 'delivered' | 'cancelled');
+      this.dataService.updateOrderStatus(orderId, status as 'pending' | 'inProgress' | 'readyForDelivery' | 'onTheWay' | 'delivered' | 'cancelled');
 
       this.loadData();
 

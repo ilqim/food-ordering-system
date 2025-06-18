@@ -15,7 +15,7 @@
       <div class="order-header">
         <div class="order-info">
           <h3 class="order-id">Sipariş #{{ order.id }}</h3>
-          <span class="order-date">{{ formatDate(order.createdAt) }}</span>
+          <span class="order-date">{{ formatDate(order.orderDate) }}</span>
         </div>
         <div class="order-status-badge" [class]="'status-' + order.status">
           {{ getStatusText(order.status) }}
