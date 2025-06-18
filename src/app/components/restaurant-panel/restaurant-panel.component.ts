@@ -117,7 +117,7 @@ export class RestaurantPanelComponent implements OnInit {
       name: meal.name,
       price: meal.price,
       description: meal.description,
-      imageUrl: meal.imageUrl
+      image: meal.image
     };
     this.showAddMealForm = true;
   }

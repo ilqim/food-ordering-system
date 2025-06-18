@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/shared/header/header.component';
-import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -10,36 +9,23 @@ import { AuthService } from './services/auth.service';
   imports: [CommonModule, RouterOutlet, HeaderComponent],
   template: `
     <div class="app-container">
-      <app-header *ngIf="isAuthenticated"></app-header>
-      <main class="main-content" [class.with-header]="isAuthenticated">
+      <app-header></app-header>
+      <main class="main-content">
         <router-outlet></router-outlet>
       </main>
     </div>
   `,
   styles: [`
     .app-container {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+      min-height: 100vh;
+      background-color: #f8f9fa;
     }
-    
     .main-content {
-      flex: 1;
-      overflow-y: auto;
-      background-color: #f5f5f5;
-    }
-    
-    .main-content.with-header {
-      margin-top: 64px;
+      padding-top: 80px;
+      min-height: calc(100vh - 80px);
     }
   `]
 })
 export class AppComponent {
-  title = 'food-delivery-app';
-  
-  constructor(public authService: AuthService) {}
-  
-  get isAuthenticated(): boolean {
-    return this.authService.isAuthenticated();
-  }
+  title = 'Gelişmiş Yemek Sipariş Uygulaması';
 }

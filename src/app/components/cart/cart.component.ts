@@ -1,11 +1,12 @@
+// src/app/components/cart/cart.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService } from '../../services/cart.service';
-import { DataService } from '../../services/data.service';
+import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
-import { Cart, Meal, Order } from '../../models';
+import { Cart, CartItem } from '../../models';
 
 @Component({
   selector: 'app-cart',
@@ -15,112 +16,93 @@ import { Cart, Meal, Order } from '../../models';
   styleUrls: ['./cart.component.scss']
 })
 export class CartComponent implements OnInit {
-  cart: Cart | null = null;
-  meals: Meal[] = [];
-  address = '';
-  paymentType = 'cash';
-  orderNote = '';
-  totalPrice = 0;
+  cart: Cart = { items: [], totalPrice: 0 };
+  
+  // Sipariş formu
+  address: string = '';
+  phone: string = '';
+  notes: string = '';
+  paymentType: 'cash' | 'card' = 'cash';
+  
+  isPlacingOrder = false;
 
   constructor(
     private cartService: CartService,
-    private dataService: DataService,
+    private orderService: OrderService,
     private authService: AuthService,
     private router: Router
   ) {}
 
-  ngOnInit() {
-    this.loadCart();
-    this.loadMeals();
+  ngOnInit(): void {
+    this.cartService.cart$.subscribe(cart => {
+      this.cart = cart;
+    });
+
+    // Kullanıcı bilgilerini doldur
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.address = user.address || '';
+      this.phone = user.phone || '';
+    }
   }
 
-  loadCart() {
-    this.cart = this.cartService.getCart();
-    this.calculateTotal();
-  }
-
-  loadMeals() {
-    this.meals = this.dataService.getMeals();
-  }
-
-  getMealById(id: string): Meal | undefined {
-    return this.meals.find(meal => meal.id === id);
-  }
-
-  updateQuantity(mealId: string, quantity: number) {
-    if (quantity <= 0) {
-      this.removeFromCart(mealId);
+  updateQuantity(mealId: string, quantity: number): void {
+    if (quantity < 1) {
+      this.removeItem(mealId);
     } else {
       this.cartService.updateQuantity(mealId, quantity);
-      this.loadCart();
     }
   }
 
-  removeFromCart(mealId: string) {
+  removeItem(mealId: string): void {
     this.cartService.removeFromCart(mealId);
-    this.loadCart();
   }
 
-  calculateTotal() {
-    this.totalPrice = 0;
-    if (this.cart && this.cart.items.length > 0) {
-      this.cart.items.forEach(item => {
-        const meal = this.getMealById(item.mealId);
-        if (meal) {
-          this.totalPrice += meal.price * item.quantity;
-        }
-      });
+  clearCart(): void {
+    if (confirm('Sepeti tamamen temizlemek istediğinizden emin misiniz?')) {
+      this.cartService.clearCart();
     }
   }
 
-  placeOrder() {
-    if (!this.cart || this.cart.items.length === 0) {
-      alert('Sepetiniz boş!');
-      return;
-    }
-
+  placeOrder(): void {
     if (!this.address.trim()) {
-      alert('Lütfen adres giriniz!');
+      alert('Lütfen teslimat adresini girin!');
       return;
     }
 
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      this.router.navigate(['/login']);
+    if (!this.phone.trim()) {
+      alert('Lütfen telefon numaranızı girin!');
       return;
     }
 
-    // Sipariş oluştur
-    const order: Order = {
-      id: Date.now().toString(),
-      customerId: currentUser.id,
-      restaurantId: this.cart.items[0] ? this.getMealById(this.cart.items[0].mealId)?.restaurantId || '' : '',
-      courierId: '',
-      items: [...this.cart.items],
-      status: 'pending',
-      address: this.address,
-      totalPrice: this.totalPrice,
-      paymentType: this.paymentType,
-      orderNote: this.orderNote,
-      createdAt: new Date().toISOString()
-    };
+    if (this.cart.items.length === 0) {
+      alert('Sepetinizde ürün yok!');
+      return;
+    }
 
-    // Siparişi kaydet
-    this.dataService.addOrder(order);
-    
-    // Sepeti temizle
-    this.cartService.clearCart();
-    
-    alert('Siparişiniz başarıyla verildi!');
-    this.router.navigate(['/orders']);
+    this.isPlacingOrder = true;
+
+    // Gerçek uygulamada async işlem
+    setTimeout(() => {
+      const orderId = this.orderService.createOrder(
+        this.address,
+        this.phone,
+        this.notes,
+        this.paymentType
+      );
+
+      if (orderId) {
+        alert('Siparişiniz başarıyla verildi! Sipariş No: ' + orderId);
+        this.router.navigate(['/orders']);
+      } else {
+        alert('Sipariş verilirken bir hata oluştu!');
+      }
+
+      this.isPlacingOrder = false;
+    }, 1500);
   }
 
-  clearCart() {
-    this.cartService.clearCart();
-    this.loadCart();
-  }
-
-  continueShopping() {
+  continueShopping(): void {
     this.router.navigate(['/home']);
   }
 }

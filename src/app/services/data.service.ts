@@ -6,48 +6,47 @@ import { Meal, Order, User } from '../models';
 })
 export class DataService {
   constructor() {
-    this.initializeDefaultData();
+    this.initializeDefaultMeals();
   }
 
-  private initializeDefaultData() {
-    // Default meals
+  private initializeDefaultMeals(): void {
     const meals = this.getMeals();
     if (meals.length === 0) {
       const defaultMeals: Meal[] = [
         {
           id: '1',
           restaurantId: '2',
-          name: 'Margherita Pizza',
-          price: 45.99,
-          description: 'Klasik domates sosu, mozzarella ve fesleğen',
-          category: 'Pizza',
+          name: 'Adana Kebap',
+          price: 45,
+          description: 'Özel baharatlarla hazırlanmış nefis Adana kebap',
+          category: 'Ana Yemek',
           available: true
         },
         {
           id: '2',
           restaurantId: '2',
-          name: 'Pepperoni Pizza',
-          price: 52.99,
-          description: 'Domates sosu, mozzarella ve pepperoni',
-          category: 'Pizza',
+          name: 'Lahmacun',
+          price: 12,
+          description: 'İnce hamur üzerine özel karışım',
+          category: 'Ana Yemek',
           available: true
         },
         {
           id: '3',
-          restaurantId: '3',
-          name: 'Whopper Burger',
-          price: 39.99,
-          description: 'Büyük boy burger, özel sos ile',
-          category: 'Burger',
+          restaurantId: '2',
+          name: 'Mercimek Çorbası',
+          price: 15,
+          description: 'Ev yapımı mercimek çorbası',
+          category: 'Çorba',
           available: true
         },
         {
           id: '4',
-          restaurantId: '3',
-          name: 'Chicken Royale',
-          price: 35.99,
-          description: 'Tavuk burger, mayonez ve salata',
-          category: 'Burger',
+          restaurantId: '2',
+          name: 'Baklava',
+          price: 25,
+          description: 'Antep fıstıklı özel baklava',
+          category: 'Tatlı',
           available: true
         }
       ];
@@ -55,7 +54,7 @@ export class DataService {
     }
   }
 
-  // Meals
+  // Meal operations
   getMeals(): Meal[] {
     const meals = localStorage.getItem('meals');
     return meals ? JSON.parse(meals) : [];
@@ -87,18 +86,18 @@ export class DataService {
     localStorage.setItem('meals', JSON.stringify(meals));
   }
 
-  // Orders
+  // Order operations
   getOrders(): Order[] {
     const orders = localStorage.getItem('orders');
     return orders ? JSON.parse(orders) : [];
   }
 
-  getOrdersByRestaurant(restaurantId: string): Order[] {
-    return this.getOrders().filter(order => order.restaurantId === restaurantId);
-  }
-
   getOrdersByCustomer(customerId: string): Order[] {
     return this.getOrders().filter(order => order.customerId === customerId);
+  }
+
+  getOrdersByRestaurant(restaurantId: string): Order[] {
+    return this.getOrders().filter(order => order.restaurantId === restaurantId);
   }
 
   getOrdersByCourier(courierId: string): Order[] {
@@ -106,7 +105,7 @@ export class DataService {
   }
 
   getAvailableOrdersForCourier(): Order[] {
-    return this.getOrders().filter(order => order.status === 'ready' && !order.courierId);
+    return this.getOrders().filter(order => order.status === 'readyForDelivery' && !order.courierId);
   }
 
   saveOrder(order: Order): void {
@@ -133,14 +132,14 @@ export class DataService {
         const users = this.getUsers();
         const courier = users.find(u => u.id === courierId);
         if (courier) {
-          order.courierName = courier.name || courier.username;
+          order.courierName = courier.name;
         }
       }
       localStorage.setItem('orders', JSON.stringify(orders));
     }
   }
 
-  // Users
+  // User operations
   getUsers(): User[] {
     const users = localStorage.getItem('users');
     return users ? JSON.parse(users) : [];
@@ -148,9 +147,5 @@ export class DataService {
 
   getRestaurants(): User[] {
     return this.getUsers().filter(user => user.role === 'restaurant');
-  }
-
-  getCouriers(): User[] {
-    return this.getUsers().filter(user => user.role === 'courier');
   }
 }

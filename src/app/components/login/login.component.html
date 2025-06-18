@@ -1,11 +1,12 @@
+<!-- src/app/components/login/login.component.html -->
 <div class="login-container">
   <div class="login-card">
     <div class="login-header">
-      <h1>🍕 Yemek Sipariş</h1>
-      <p>Hesabınıza giriş yapın</p>
+      <h1>🍔 YemekApp</h1>
+      <p>Giriş Yapın</p>
     </div>
 
-    <form (ngSubmit)="onSubmit()" class="login-form">
+    <form (ngSubmit)="login()" class="login-form">
       <div class="form-group">
         <label for="username">Kullanıcı Adı</label>
         <input
@@ -13,7 +14,6 @@
           id="username"
           [(ngModel)]="username"
           name="username"
-          class="form-control"
           placeholder="Kullanıcı adınızı girin"
           required
         />
@@ -26,37 +26,34 @@
           id="password"
           [(ngModel)]="password"
           name="password"
-          class="form-control"
           placeholder="Şifrenizi girin"
           required
         />
       </div>
 
-      <div class="error-message" *ngIf="error">
-        {{ error }}
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
       </div>
 
-      <button type="submit" class="btn-login" [disabled]="!username || !password">
-        Giriş Yap
+      <button type="submit" class="login-btn" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Giriş Yap</span>
+        <span *ngIf="isLoading">Giriş yapılıyor...</span>
       </button>
     </form>
 
-    <div class="test-accounts-section">
-      <button type="button" class="btn-test-toggle" (click)="toggleTestAccounts()">
-        {{ showTestAccounts ? 'Test Hesaplarını Gizle' : 'Test Hesaplarını Göster' }}
-      </button>
-
-      <div class="test-accounts" *ngIf="showTestAccounts">
-        <h3>Test Hesapları</h3>
-        <div class="test-account-list">
-          <div 
-            *ngFor="let account of testAccounts" 
-            class="test-account-item"
-            (click)="useTestAccount(account)"
-          >
-            <strong>{{ account.role }}</strong>
-            <small>{{ account.username }} / {{ account.password }}</small>
+    <div class="demo-section">
+      <h3>Demo Hesapları</h3>
+      <div class="demo-users">
+        <div 
+          *ngFor="let user of demoUsers" 
+          class="demo-user"
+          (click)="loginWithDemo(user.username, user.password)"
+        >
+          <div class="demo-user-info">
+            <strong>{{ user.role }}</strong>
+            <span>{{ user.username }} / {{ user.password }}</span>
           </div>
+          <button type="button">Giriş Yap</button>
         </div>
       </div>
     </div>

@@ -1,62 +1,53 @@
+// src/app/components/shared/header/header.component.ts
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { CartService } from '../../../services/cart.service';
 import { User } from '../../../models';
-import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-  currentUser: User | null = null;
-  cartItemCount = 0;
+  currentUser$: Observable<User | null>;
+  cartItemCount$: Observable<number>;
 
   constructor(
     private authService: AuthService,
     private cartService: CartService,
     private router: Router
-  ) {}
-
-  ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-    });
-
-    this.cartService.cart$.subscribe(cart => {
-      this.cartItemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+  ) {
+    this.currentUser$ = this.authService.currentUser$;
+    this.cartItemCount$ = new Observable(observer => {
+      this.cartService.cart$.subscribe(cart => {
+        observer.next(cart.items.reduce((total, item) => total + item.quantity, 0));
+      });
     });
   }
 
-  logout() {
+  ngOnInit(): void {}
+
+  logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
 
-  navigateToHome() {
-    if (this.currentUser) {
-      switch (this.currentUser.role) {
-        case 'customer':
-          this.router.navigate(['/home']);
-          break;
-        case 'restaurant':
-          this.router.navigate(['/restaurant-panel']);
-          break;
-        case 'courier':
-          this.router.navigate(['/courier-panel']);
-          break;
-        default:
-          this.router.navigate(['/home']);
-      }
+  navigateByRole(user: User): string {
+    switch (user.role) {
+      case 'restaurant':
+        return '/restaurant-panel';
+      case 'courier':
+        return '/courier-panel';
+      case 'customer':
+        return '/home';
+      default:
+        return '/home';
     }
   }
-
-  navigateToCart() {
-    this.router.navigate(['/cart']);
-  }
-
-  navigateToOrders() {
+}

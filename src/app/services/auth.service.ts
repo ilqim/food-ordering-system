@@ -10,14 +10,14 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor() {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      this.currentUserSubject.next(JSON.parse(savedUser));
-    }
     this.initializeDefaultUsers();
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      this.currentUserSubject.next(JSON.parse(storedUser));
+    }
   }
 
-  private initializeDefaultUsers() {
+  private initializeDefaultUsers(): void {
     const users = this.getUsers();
     if (users.length === 0) {
       const defaultUsers: User[] = [
@@ -26,42 +26,36 @@ export class AuthService {
           username: 'admin',
           password: 'admin123',
           role: 'admin',
-          name: 'Admin User'
+          name: 'Admin User',
+          email: 'admin@foodapp.com'
         },
         {
           id: '2',
-          username: 'pizza_palace',
-          password: 'restaurant123',
+          username: 'restoran1',
+          password: 'rest123',
           role: 'restaurant',
-          name: 'Pizza Palace',
-          restaurantName: 'Pizza Palace',
-          phone: '0532 123 45 67'
+          name: 'Lezzet Restoran',
+          email: 'info@lezzet.com',
+          phone: '0212-555-0001'
         },
         {
           id: '3',
-          username: 'burger_king',
-          password: 'restaurant123',
-          role: 'restaurant',
-          name: 'Burger King',
-          restaurantName: 'Burger King',
-          phone: '0532 234 56 78'
+          username: 'kurye1',
+          password: 'kurye123',
+          role: 'courier',
+          name: 'Ahmet Kurye',
+          email: 'ahmet@kurye.com',
+          phone: '0532-555-0001'
         },
         {
           id: '4',
-          username: 'courier1',
-          password: 'courier123',
-          role: 'courier',
-          name: 'Ahmet Kurye',
-          phone: '0533 345 67 89'
-        },
-        {
-          id: '5',
-          username: 'customer1',
-          password: 'customer123',
+          username: 'musteri1',
+          password: 'musteri123',
           role: 'customer',
-          name: 'Mehmet Müşteri',
-          phone: '0534 456 78 90',
-          address: 'Çankaya, Ankara'
+          name: 'Fatma Müşteri',
+          email: 'fatma@email.com',
+          phone: '0533-555-0001',
+          address: 'Ankara Çankaya'
         }
       ];
       localStorage.setItem('users', JSON.stringify(defaultUsers));
@@ -73,16 +67,16 @@ export class AuthService {
     const user = users.find(u => u.username === username && u.password === password);
     
     if (user) {
-      localStorage.setItem('currentUser', JSON.stringify(user));
       this.currentUserSubject.next(user);
+      localStorage.setItem('currentUser', JSON.stringify(user));
       return true;
     }
     return false;
   }
 
-  logout() {
-    localStorage.removeItem('currentUser');
+  logout(): void {
     this.currentUserSubject.next(null);
+    localStorage.removeItem('currentUser');
   }
 
   getCurrentUser(): User | null {
@@ -90,7 +84,7 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return this.getCurrentUser() !== null;
+    return this.currentUserSubject.value !== null;
   }
 
   hasRole(role: string): boolean {
@@ -105,17 +99,19 @@ export class AuthService {
 
   register(user: Omit<User, 'id'>): boolean {
     const users = this.getUsers();
-    const exists = users.some(u => u.username === user.username);
+    const existingUser = users.find(u => u.username === user.username);
     
-    if (!exists) {
-      const newUser: User = {
-        ...user,
-        id: Date.now().toString()
-      };
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
-      return true;
+    if (existingUser) {
+      return false;
     }
-    return false;
+
+    const newUser: User = {
+      ...user,
+      id: Date.now().toString()
+    };
+
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+    return true;
   }
 }

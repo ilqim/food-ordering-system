@@ -1,0 +1,7 @@
+/* src/app/app.component.scss */
+.main-content {
+  margin-top: 70px; // Header yüksekliği için
+  min-height: calc(100vh - 70px);
+  padding: 20px;
+  background-color: #f8f9fa;
+}

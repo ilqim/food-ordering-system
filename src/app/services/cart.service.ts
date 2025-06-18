@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Cart, CartItem } from '../models';
+import { Cart, CartItem, Meal } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -14,74 +14,73 @@ export class CartService {
   }
 
   private loadCart(): void {
-    const saved = localStorage.getItem('cart');
-    if (saved) {
-      const cart = JSON.parse(saved);
-      this.cartSubject.next(cart);
+    const savedCart = localStorage.getItem('currentCart');
+    if (savedCart) {
+      this.cartSubject.next(JSON.parse(savedCart));
     }
   }
 
   private saveCart(): void {
-    localStorage.setItem('cart', JSON.stringify(this.cartSubject.value));
+    localStorage.setItem('currentCart', JSON.stringify(this.cartSubject.value));
   }
 
-  addToCart(item: Omit<CartItem, 'quantity'>): void {
-    const cart = this.cartSubject.value;
+  addToCart(meal: Meal, quantity: number = 1): boolean {
+    const currentCart = this.cartSubject.value;
     
-    // Farklı restorandan ürün eklenmek istenirse sepeti temizle
-    if (cart.restaurantId && cart.restaurantId !== item.restaurantId) {
-      this.clearCart();
+    // Farklı restorandan ürün eklemeye izin verme
+    if (currentCart.restaurantId && currentCart.restaurantId !== meal.restaurantId) {
+      return false;
     }
 
-    const existingItem = cart.items.find(i => i.mealId === item.mealId);
+    const existingItem = currentCart.items.find(item => item.meal.id === meal.id);
     
     if (existingItem) {
-      existingItem.quantity += 1;
+      existingItem.quantity += quantity;
     } else {
-      cart.items.push({ ...item, quantity: 1 });
+      currentCart.items.push({ meal, quantity });
     }
 
-    cart.restaurantId = item.restaurantId;
-    this.updateTotalPrice();
+    currentCart.restaurantId = meal.restaurantId;
+    currentCart.totalPrice = this.calculateTotal(currentCart.items);
+    
+    this.cartSubject.next(currentCart);
+    this.saveCart();
+    return true;
   }
 
   removeFromCart(mealId: string): void {
-    const cart = this.cartSubject.value;
-    cart.items = cart.items.filter(item => item.mealId !== mealId);
+    const currentCart = this.cartSubject.value;
+    currentCart.items = currentCart.items.filter(item => item.meal.id !== mealId);
+    currentCart.totalPrice = this.calculateTotal(currentCart.items);
     
-    if (cart.items.length === 0) {
-      cart.restaurantId = undefined;
+    if (currentCart.items.length === 0) {
+      currentCart.restaurantId = undefined;
+      currentCart.restaurantName = undefined;
     }
     
-    this.updateTotalPrice();
+    this.cartSubject.next(currentCart);
+    this.saveCart();
   }
 
   updateQuantity(mealId: string, quantity: number): void {
-    const cart = this.cartSubject.value;
-    const item = cart.items.find(i => i.mealId === mealId);
+    const currentCart = this.cartSubject.value;
+    const item = currentCart.items.find(item => item.meal.id === mealId);
     
     if (item) {
       if (quantity <= 0) {
         this.removeFromCart(mealId);
       } else {
         item.quantity = quantity;
-        this.updateTotalPrice();
+        currentCart.totalPrice = this.calculateTotal(currentCart.items);
+        this.cartSubject.next(currentCart);
+        this.saveCart();
       }
     }
   }
 
-  private updateTotalPrice(): void {
-    const cart = this.cartSubject.value;
-    cart.totalPrice = cart.items.reduce((total, item) => 
-      total + (item.price * item.quantity), 0
-    );
-    this.cartSubject.next(cart);
-    this.saveCart();
-  }
-
   clearCart(): void {
     this.cartSubject.next({ items: [], totalPrice: 0 });
-    localStorage.removeItem('cart');
+    localStorage.removeItem('currentCart');
   }
 
   getCart(): Cart {
@@ -90,5 +89,9 @@ export class CartService {
 
   getItemCount(): number {
     return this.cartSubject.value.items.reduce((total, item) => total + item.quantity, 0);
+  }
+
+  private calculateTotal(items: CartItem[]): number {
+    return items.reduce((total, item) => total + (item.meal.price * item.quantity), 0);
   }
 }

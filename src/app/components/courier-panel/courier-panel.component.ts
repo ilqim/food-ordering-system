@@ -25,7 +25,7 @@ export class CourierPanelComponent implements OnInit {
     private dataService: DataService,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.currentUser = this.authService.getCurrentUser();
@@ -33,7 +33,7 @@ export class CourierPanelComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-    
+
     this.loadData();
   }
 
@@ -41,16 +41,16 @@ export class CourierPanelComponent implements OnInit {
     const orders = this.dataService.getOrders();
     this.meals = this.dataService.getMeals();
     this.users = this.dataService.getUsers();
-    
+
     // Kurye'ye atanan siparişler
-    this.assignedOrders = orders.filter(order => 
-      order.courierId === this.currentUser?.id && 
+    this.assignedOrders = orders.filter(order =>
+      order.courierId === this.currentUser?.id &&
       ['readyForDelivery', 'onTheWay'].includes(order.status)
     );
-    
+
     // Atanmayı bekleyen siparişler
-    this.availableOrders = orders.filter(order => 
-      order.status === 'readyForDelivery' && 
+    this.availableOrders = orders.filter(order =>
+      order.status === 'ready' &&
       (!order.courierId || order.courierId === '')
     );
   }
@@ -87,9 +87,10 @@ export class CourierPanelComponent implements OnInit {
     };
 
     if (confirm(statusMessages[status])) {
-      this.dataService.updateOrderStatus(orderId, status);
+      this.dataService.updateOrderStatus(orderId, status as 'pending' | 'confirmed' | 'preparing' | 'ready' | 'onTheWay' | 'delivered' | 'cancelled');
+
       this.loadData();
-      
+
       if (status === 'delivered') {
         alert('Sipariş başarıyla teslim edildi!');
       }

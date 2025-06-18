@@ -14,11 +14,11 @@ export interface Order {
   courierId?: string;
   courierName?: string;
   items: OrderItem[];
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'onTheWay' | 'delivered' | 'cancelled';
+  status: 'pending' | 'inProgress' | 'readyForDelivery' | 'onTheWay' | 'delivered' | 'cancelled';
   address: string;
   phone: string;
   totalPrice: number;
   orderDate: Date;
   notes?: string;
-  paymentMethod?: 'cash' | 'card';
+  paymentType: 'cash' | 'card';
 }

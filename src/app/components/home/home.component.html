@@ -1,112 +1,88 @@
+<!-- src/app/components/home/home.component.html -->
 <div class="home-container">
-  <!-- Header -->
-  <div class="home-header">
-    <div class="header-content">
-      <div class="brand">
-        <h1>🍽️ Yemek Siparişi</h1>
-        <p>Lezzetli yemekler kapınızda!</p>
-      </div>
-      
-      <div class="user-actions">
-        <span class="welcome">Hoş geldin, {{ currentUser?.username }}!</span>
-        <button class="btn-outline" (click)="goToOrders()">
-          📋 Siparişlerim
-        </button>
-        <button class="btn-cart" (click)="goToCart()">
-          🛒 Sepet
-        </button>
-        <button class="btn-secondary" (click)="logout()">
-          Çıkış
-        </button>
-      </div>
+  <!-- Admin/Restaurant/Courier için panel yönlendirmesi -->
+  <div class="welcome-section" *ngIf="currentUser && currentUser.role !== 'customer'">
+    <div class="welcome-card">
+      <h2>Hoş Geldiniz, {{ currentUser.name }}!</h2>
+      <p *ngIf="currentUser.role === 'restaurant'">Restoran panelinizden menünüzü yönetebilir ve siparişlerinizi takip edebilirsiniz.</p>
+      <p *ngIf="currentUser.role === 'courier'">Kurye panelinizden size atanan siparişleri görebilir ve teslimat yapabilirsiniz.</p>
+      <p *ngIf="currentUser.role === 'admin'">Admin panelinizden tüm işlemleri yönetebilirsiniz.</p>
+      <button class="panel-btn" (click)="navigateToPanel()">
+        {{ currentUser.role === 'restaurant' ? 'Restoran Paneli' : 
+           currentUser.role === 'courier' ? 'Kurye Paneli' : 'Admin Paneli' }}
+      </button>
     </div>
   </div>
 
-  <!-- Filters -->
-  <div class="filters-section">
-    <div class="filters-container">
-      <div class="search-box">
-        <input 
-          type="text" 
-          placeholder="Yemek ara..." 
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearchChange()"
-          class="search-input">
-        <span class="search-icon">🔍</span>
-      </div>
+  <!-- Müşteri için yemek listesi -->
+  <div class="customer-section" *ngIf="currentUser?.role === 'customer'">
+    <div class="page-header">
+      <h1>🍔 Yemek Siparişi</h1>
+      <p>Lezzetli yemekleri keşfedin ve sipariş verin!</p>
+    </div>
 
-      <div class="filter-group">
-        <select 
-          [(ngModel)]="selectedRestaurant" 
-          (ngModelChange)="onRestaurantChange()"
-          class="filter-select">
-          <option value="">Tüm Restoranlar</option>
-          <option *ngFor="let restaurant of restaurants" [value]="restaurant.id">
-            {{ restaurant.username }}
-          </option>
-        </select>
-      </div>
+    <!-- Filtreler -->
+    <div class="filters-section">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="search">Yemek Ara:</label>
+          <input
+            type="text"
+            id="search"
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange()"
+            placeholder="Yemek adı veya açıklama..."
+            class="search-input"
+          />
+        </div>
 
-      <div class="filter-group">
-        <select 
-          [(ngModel)]="selectedCategory" 
-          (ngModelChange)="onCategoryChange()"
-          class="filter-select">
-          <option value="">Tüm Kategoriler</option>
-          <option *ngFor="let category of categories" [value]="category">
-            {{ category }}
-          </option>
-        </select>
-      </div>
+        <div class="filter-group">
+          <label for="restaurant">Restoran:</label>
+          <select
+            id="restaurant"
+            [(ngModel)]="selectedRestaurantId"
+            (change)="onRestaurantChange()"
+            class="filter-select"
+          >
+            <option value="">Tüm Restoranlar</option>
+            <option *ngFor="let restaurant of restaurants" [value]="restaurant.id">
+              {{ restaurant.name }}
+            </option>
+          </select>
+        </div>
 
-      <div class="results-count">
-        {{ filteredMeals.length }} yemek bulundu
+        <div class="filter-group">
+          <label for="category">Kategori:</label>
+          <select
+            id="category"
+            [(ngModel)]="selectedCategory"
+            (change)="onCategoryChange()"
+            class="filter-select"
+          >
+            <option value="">Tüm Kategoriler</option>
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Meals Grid -->
-  <div class="meals-section">
-    <div class="meals-container">
-      <div *ngIf="filteredMeals.length === 0" class="empty-state">
-        <div class="empty-icon">🍽️</div>
-        <h3>Aradığınız kriterlere uygun yemek bulunamadı</h3>
-        <p>Farklı arama terimleri veya filtreler deneyebilirsiniz.</p>
-        <button class="btn-primary" (click)="searchTerm = ''; selectedRestaurant = ''; selectedCategory = ''; filterMeals()">
-          Filtreleri Temizle
-        </button>
-      </div>
-
+    <!-- Yemek Listesi -->
+    <div class="meals-section">
       <div class="meals-grid" *ngIf="filteredMeals.length > 0">
-        <app-meal-card 
-          *ngFor="let meal of filteredMeals" 
+        <app-meal-card
+          *ngFor="let meal of filteredMeals"
           [meal]="meal"
           [restaurantName]="getRestaurantName(meal.restaurantId)"
-          (addToCart)="addToCart($event)">
-        </app-meal-card>
+          (addToCart)="addToCart($event)"
+        ></app-meal-card>
       </div>
-    </div>
-  </div>
 
-  <!-- Featured Categories -->
-  <div class="categories-section" *ngIf="searchTerm === '' && selectedRestaurant === '' && selectedCategory === ''">
-    <div class="categories-container">
-      <h2>Kategoriler</h2>
-      <div class="categories-grid">
-        <div 
-          *ngFor="let category of categories" 
-          class="category-card"
-          (click)="selectedCategory = category; onCategoryChange()">
-          <div class="category-icon">
-            <span *ngIf="category === 'Hamburger'">🍔</span>
-            <span *ngIf="category === 'Pizza'">🍕</span>
-            <span *ngIf="category === 'Türk Mutfağı'">🥙</span>
-            <span *ngIf="category === 'İtalyan'">🍝</span>
-            <span *ngIf="category === 'Çin Mutfağı'">🥡</span>
-            <span *ngIf="category === 'Tatlı'">🍰</span>
-            <span *ngIf="category === 'İçecek'">🥤</span>
-          </div>
-          <h4>{{ category }}</h4>
+      <div class="no-meals" *ngIf="filteredMeals.length === 0">
+        <div class="no-meals-content">
+          <h3>Yemek Bulunamadı</h3>
+          <p>Arama kriterlerinize uygun yemek bulunamadı. Filtreleri değiştirmeyi deneyin.</p>
         </div>
       </div>
     </div>

@@ -14,34 +14,34 @@ export class OrderService {
     private cartService: CartService
   ) {}
 
-  createOrder(address: string, phone: string, notes?: string, paymentMethod: 'cash' | 'card' = 'cash'): string | null {
-    const user = this.authService.getCurrentUser();
+  createOrder(address: string, phone: string, notes: string, paymentType: 'cash' | 'card'): string | null {
+    const currentUser = this.authService.getCurrentUser();
     const cart = this.cartService.getCart();
-
-    if (!user || cart.items.length === 0) {
+    
+    if (!currentUser || !cart.items.length) {
       return null;
     }
 
     const restaurants = this.dataService.getRestaurants();
     const restaurant = restaurants.find(r => r.id === cart.restaurantId);
-
+    
     if (!restaurant) {
       return null;
     }
 
     const orderItems: OrderItem[] = cart.items.map(item => ({
-      mealId: item.mealId,
-      mealName: item.mealName,
+      mealId: item.meal.id,
+      mealName: item.meal.name,
       quantity: item.quantity,
-      price: item.price
+      price: item.meal.price
     }));
 
     const order: Order = {
       id: Date.now().toString(),
-      customerId: user.id,
-      customerName: user.name || user.username,
-      restaurantId: cart.restaurantId!,
-      restaurantName: restaurant.restaurantName || restaurant.name || restaurant.username,
+      customerId: currentUser.id,
+      customerName: currentUser.name,
+      restaurantId: restaurant.id,
+      restaurantName: restaurant.name,
       items: orderItems,
       status: 'pending',
       address,
@@ -49,7 +49,7 @@ export class OrderService {
       totalPrice: cart.totalPrice,
       orderDate: new Date(),
       notes,
-      paymentMethod
+      paymentType
     };
 
     this.dataService.saveOrder(order);
@@ -58,16 +58,27 @@ export class OrderService {
     return order.id;
   }
 
-  updateOrderStatus(orderId: string, status: Order['status'], courierId?: string): boolean {
-    try {
-      this.dataService.updateOrderStatus(orderId, status, courierId);
-      return true;
-    } catch (error) {
-      return false;
-    }
+  updateOrderStatus(orderId: string, status: Order['status'], courierId?: string): void {
+    this.dataService.updateOrderStatus(orderId, status, courierId);
   }
 
-  assignCourierToOrder(orderId: string, courierId: string): boolean {
-    return this.updateOrderStatus(orderId, 'onTheWay', courierId);
+  getOrdersByUser(userId: string): Order[] {
+    return this.dataService.getOrdersByCustomer(userId);
+  }
+
+  getOrdersByRestaurant(restaurantId: string): Order[] {
+    return this.dataService.getOrdersByRestaurant(restaurantId);
+  }
+
+  getOrdersByCourier(courierId: string): Order[] {
+    return this.dataService.getOrdersByCourier(courierId);
+  }
+
+  getAvailableOrdersForCourier(): Order[] {
+    return this.dataService.getAvailableOrdersForCourier();
+  }
+
+  assignCourierToOrder(orderId: string, courierId: string): void {
+    this.updateOrderStatus(orderId, 'onTheWay', courierId);
   }
 }
