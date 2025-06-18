@@ -116,7 +116,7 @@ export class RestaurantPanelComponent implements OnInit {
       name: meal.name,
       price: meal.price,
       description: meal.description,
-      image: meal.image
+      image: meal.image || ''
     };
     this.showAddMealForm = true;
   }
@@ -210,9 +210,9 @@ export class RestaurantPanelComponent implements OnInit {
     return statusClasses[status] || '';
   }
 
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  formatDate(date: Date | string): string {
+    const d = new Date(date);
+    return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
   }
 
   private generateId(): string {

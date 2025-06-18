@@ -100,9 +100,65 @@ export class OrdersComponent implements OnInit {
     return statusClasses[status] || '';
   }
 
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  formatDate(date: Date | string): string {
+    const d = new Date(date);
+    return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  filterOrders(status: string): void {
+    this.selectedStatus = status;
+    if (status === 'all') {
+      this.filteredOrders = [...this.orders];
+    } else {
+      this.filteredOrders = this.orders.filter(o => o.status === status);
+    }
+  }
+
+  getTotalItemCount(items: OrderItem[]): number {
+    return items.reduce((total, item) => total + item.quantity, 0);
+  }
+
+  getMealPrice(mealId: string): number {
+    const meal = this.meals.find(m => m.id === mealId);
+    return meal ? meal.price : 0;
+  }
+
+  getCourierName(courierId: string): string {
+    const courier = this.dataService.getUsers().find(u => u.id === courierId);
+    return courier ? courier.username : 'Bilinmeyen Kurye';
+  }
+
+  isStatusCompleted(step: Order['status'], current: Order['status']): boolean {
+    const orderSteps: Order['status'][] = ['pending', 'inProgress', 'readyForDelivery', 'onTheWay', 'delivered'];
+    return orderSteps.indexOf(current) >= orderSteps.indexOf(step);
+  }
+
+  reorderItems(order: Order): void {
+    order.items.forEach(item => {
+      const meal = this.meals.find(m => m.id === item.mealId);
+      if (meal) {
+        this.cartService.addToCart(meal, item.quantity);
+      }
+    });
+    alert('Ürünler sepete eklendi');
+  }
+
+  cancelOrder(orderId: string): void {
+    if (confirm('Siparişi iptal etmek istiyor musunuz?')) {
+      this.dataService.updateOrderStatus(orderId, 'cancelled');
+      this.loadData();
+      this.filterOrders(this.selectedStatus);
+    }
+  }
+
+  rateOrder(orderId: string): void {
+    alert('Sipariş değerlendirme özelliği henüz uygulanmadı.');
+  }
+
+  getEmptyStateMessage(): string {
+    return this.selectedStatus === 'all'
+      ? 'Henüz hiç sipariş vermediniz.'
+      : 'Bu durumda sipariş bulunmamaktadır.';
   }
 
   filterOrders(status: string): void {

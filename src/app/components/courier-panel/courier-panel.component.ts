@@ -119,8 +119,8 @@ export class CourierPanelComponent implements OnInit {
     return classMap[status] || '';
   }
 
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleString('tr-TR');
+  formatDate(date: Date | string): string {
+    return new Date(date).toLocaleString('tr-TR');
   }
 
   logout() {

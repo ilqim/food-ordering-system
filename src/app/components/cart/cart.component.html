@@ -63,7 +63,7 @@
           <h3>Sipariş Özeti</h3>
           <div class="summary-line">
             <span>Toplam Ürün:</span>
-            <span>{{ cart.items.reduce((total, item) => total + item.quantity, 0) }} adet</span>
+            <span>{{ getTotalQuantity() }} adet</span>
           </div>
           <div class="summary-line total">
             <span>Toplam Tutar:</span>

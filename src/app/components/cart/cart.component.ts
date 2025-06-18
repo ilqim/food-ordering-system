@@ -1,4 +1,3 @@
-// src/app/components/cart/cart.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -62,6 +61,10 @@ export class CartComponent implements OnInit {
     if (confirm('Sepeti tamamen temizlemek istediğinizden emin misiniz?')) {
       this.cartService.clearCart();
     }
+  }
+
+  getTotalQuantity(): number {
+    return this.cart.items.reduce((total, item) => total + item.quantity, 0);
   }
 
   placeOrder(): void {
