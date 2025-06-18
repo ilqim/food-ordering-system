@@ -25,7 +25,7 @@ export class RestaurantPanelComponent implements OnInit {
     name: '',
     price: 0,
     description: '',
-    imageUrl: ''
+    image: ''
   };
 
   // Sipariş yönetimi
@@ -90,9 +90,9 @@ export class RestaurantPanelComponent implements OnInit {
         name: this.mealForm.name,
         price: this.mealForm.price,
         description: this.mealForm.description,
-        imageUrl: this.mealForm.imageUrl
+        image: this.mealForm.image
       };
-      this.dataService.updateMeal(updatedMeal);
+      this.dataService.saveMeal(updatedMeal);
     } else {
       // Yeni ekleme
       const newMeal: Meal = {
@@ -101,10 +101,9 @@ export class RestaurantPanelComponent implements OnInit {
         name: this.mealForm.name,
         price: this.mealForm.price,
         description: this.mealForm.description,
-        imageUrl: this.mealForm.imageUrl,
-        createdAt: new Date().toISOString()
+        image: this.mealForm.image
       };
-      this.dataService.addMeal(newMeal);
+      this.dataService.saveMeal(newMeal);
     }
 
     this.resetMealForm();
@@ -138,7 +137,7 @@ export class RestaurantPanelComponent implements OnInit {
       name: '',
       price: 0,
       description: '',
-      imageUrl: ''
+      image: ''
     };
     this.editingMeal = null;
     this.showAddMealForm = false;
@@ -163,11 +162,11 @@ export class RestaurantPanelComponent implements OnInit {
     return this.restaurantOrders.filter(order => order.status === status).length;
   }
 
-  updateOrderStatus(orderId: string, newStatus: string): void {
+  updateOrderStatus(orderId: string, newStatus: Order['status']): void {
     const order = this.restaurantOrders.find(o => o.id === orderId);
     if (order) {
       order.status = newStatus;
-      this.dataService.updateOrder(order);
+      this.dataService.saveOrder(order);
       this.loadOrders();
     }
   }
