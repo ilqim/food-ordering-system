@@ -64,6 +64,10 @@ export class CartComponent implements OnInit {
     }
   }
 
+  getTotalQuantity(): number {
+    return this.cart.items.reduce((total, item) => total + item.quantity, 0);
+  }
+
   placeOrder(): void {
     if (!this.address.trim()) {
       alert('Lütfen teslimat adresini girin!');

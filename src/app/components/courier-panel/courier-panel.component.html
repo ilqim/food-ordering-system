@@ -59,10 +59,10 @@
               <strong>Toplam:</strong>
               <span class="price">{{ order.totalPrice }}₺</span>
             </div>
-            <div class="info-row" *ngIf="order.orderNote">
-              <strong>Not:</strong>
-              <span>{{ order.orderNote }}</span>
-            </div>
+              <div class="info-row" *ngIf="order.notes">
+                <strong>Not:</strong>
+                <span>{{ order.notes }}</span>
+              </div>
           </div>
 
           <div class="order-items">
@@ -91,9 +91,9 @@
             </button>
           </div>
 
-          <div class="order-date">
-            Sipariş Tarihi: {{ formatDate(order.orderDate || '') }}
-          </div>
+            <div class="order-date">
+              Sipariş Tarihi: {{ formatDate(order.orderDate) }}
+            </div>
         </div>
       </div>
     </div>
@@ -153,9 +153,9 @@
             </button>
           </div>
 
-          <div class="order-date">
-            Sipariş Tarihi: {{ formatDate(order.orderDate || '') }}
-          </div>
+            <div class="order-date">
+              Sipariş Tarihi: {{ formatDate(order.orderDate) }}
+            </div>
         </div>
       </div>
     </div>

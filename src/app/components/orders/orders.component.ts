@@ -100,9 +100,9 @@ export class OrdersComponent implements OnInit {
     return statusClasses[status] || '';
   }
 
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  formatDate(date: Date | string): string {
+    const d = new Date(date);
+    return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
   }
 
   filterOrders(status: string): void {
