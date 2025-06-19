@@ -32,7 +32,6 @@
     </div>
   </div>
 </div>
-</div>
 
 <!-- Sağ taraf - Sipariş Formu -->
 <div class="order-form-section">
@@ -56,9 +55,8 @@
         <span *ngIf="!isPlacingOrder">Sipariş Ver - ₺{{ cart.totalPrice }}</span>
         <span *ngIf="isPlacingOrder">Sipariş Veriliyor...</span>
       </button>
+    </div>
   </form>
-</div>
-</div>
 </div>
 
 <ng-template #emptyCart>
@@ -73,5 +71,3 @@
     </div>
   </div>
 </ng-template>
-
-</div>
