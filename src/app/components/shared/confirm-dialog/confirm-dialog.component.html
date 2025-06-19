@@ -1,5 +1,5 @@
-<div class="confirm-overlay" *ngIf="visible">
-  <div class="confirm-dialog">
+<div class="confirm-overlay" *ngIf="visible" (click)="onCancel()">
+  <div class="confirm-dialog" (click)="$event.stopPropagation()">
     <p class="message">{{ message }}</p>
     <div class="actions">
       <button class="btn primary" (click)="onConfirm()">Evet</button>

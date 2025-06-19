@@ -20,7 +20,19 @@ export class ConfirmDialogComponent implements OnInit {
       this.message = msg ?? '';
       this.visible = !!msg;
     });
+
+    window.addEventListener('keydown', this.handleKeydown);
   }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('keydown', this.handleKeydown);
+  }
+
+  handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.visible) {
+      this.onCancel();
+    }
+  };
 
   onConfirm() {
     this.notifier.resolveConfirm(true);
