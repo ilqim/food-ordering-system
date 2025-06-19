@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -8,15 +9,36 @@ import { CommonModule } from '@angular/common';
   templateUrl: './confirm-dialog.component.html',
   styleUrls: ['./confirm-dialog.component.scss']
 })
-export class ConfirmDialogComponent {
-  @Input() message = '';
-  @Output() confirm = new EventEmitter<boolean>();
+export class ConfirmDialogComponent implements OnInit {
+  message = '';
+  visible = false;
+
+  constructor(private notifier: NotificationService) {}
+
+  ngOnInit(): void {
+    this.notifier.confirmMessage$.subscribe(msg => {
+      this.message = msg ?? '';
+      this.visible = !!msg;
+    });
+
+    window.addEventListener('keydown', this.handleKeydown);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('keydown', this.handleKeydown);
+  }
+
+  handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.visible) {
+      this.onCancel();
+    }
+  };
 
   onConfirm() {
-    this.confirm.emit(true);
+    this.notifier.resolveConfirm(true);
   }
 
   onCancel() {
-    this.confirm.emit(false);
+    this.notifier.resolveConfirm(false);
   }
 }

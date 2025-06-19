@@ -1,167 +1,77 @@
-<!-- src/app/components/cart/cart.component.html -->
-<div class="cart-container">
-  <div class="page-header">
-    <h1>🛒 Sepetim</h1>
-    <button class="continue-shopping-btn" (click)="continueShopping()">
-      ← Alışverişe Devam Et
-    </button>
+<div class="section-header">
+  <h2>Sepetinizdeki Ürünler</h2>
+  <button class="clear-cart-btn" (click)="clearCart()">Sepeti Temizle</button>
+</div>
+
+<div class="restaurant-info" *ngIf="cart.restaurantName">
+  <h3>📍 {{ cart.restaurantName }}</h3>
+</div>
+
+<div class="cart-items">
+  <div class="cart-item" *ngFor="let item of cart.items">
+    <div class="item-image">
+      <img [src]="item.meal.image || '/assets/default-meal.jpg'" [alt]="item.meal.name" />
+    </div>
+
+    <div class="item-details">
+      <h4>{{ item.meal.name }}</h4>
+      <p class="item-description">{{ item.meal.description }}</p>
+      <div class="item-price">₺{{ item.meal.price }} / adet</div>
+    </div>
+
+    <div class="item-controls">
+      <div class="quantity-controls">
+        <button class="qty-btn" (click)="updateQuantity(item.meal.id, item.quantity - 1, item.meal.name)">-</button>
+        <span class="quantity">{{ item.quantity }}</span>
+        <button class="qty-btn" (click)="updateQuantity(item.meal.id, item.quantity + 1, item.meal.name)">+</button>
+      </div>
+
+      <div class="item-total">₺{{ item.meal.price * item.quantity }}</div>
+
+      <button class="remove-btn" (click)="removeItem(item.meal.id, item.meal.name)" title="Sepetten Çıkar">🗑️</button>
+    </div>
   </div>
+</div>
+</div>
 
-  <div class="cart-content" *ngIf="cart.items.length > 0; else emptyCart">
-    <div class="cart-layout">
-      <!-- Sol taraf - Sepet İçeriği -->
-      <div class="cart-items-section">
-        <div class="section-header">
-          <h2>Sepetinizdeki Ürünler</h2>
-          <button class="clear-cart-btn" (click)="clearCart()">Sepeti Temizle</button>
-        </div>
-
-        <div class="restaurant-info" *ngIf="cart.restaurantName">
-          <h3>📍 {{ cart.restaurantName }}</h3>
-        </div>
-
-        <div class="cart-items">
-          <div class="cart-item" *ngFor="let item of cart.items">
-            <div class="item-image">
-              <img [src]="item.meal.image || '/assets/default-meal.jpg'" [alt]="item.meal.name" />
-            </div>
-            
-            <div class="item-details">
-              <h4>{{ item.meal.name }}</h4>
-              <p class="item-description">{{ item.meal.description }}</p>
-              <div class="item-price">₺{{ item.meal.price }} / adet</div>
-            </div>
-            
-            <div class="item-controls">
-              <div class="quantity-controls">
-                <button 
-                  class="qty-btn"
-                (click)="updateQuantity(item.meal.id, item.quantity - 1, item.meal.name)"
-                >-</button>
-                <span class="quantity">{{ item.quantity }}</span>
-                <button 
-                  class="qty-btn"
-                (click)="updateQuantity(item.meal.id, item.quantity + 1, item.meal.name)"
-                >+</button>
-              </div>
-              
-              <div class="item-total">₺{{ item.meal.price * item.quantity }}</div>
-              
-              <button
-                class="remove-btn"
-                (click)="requestRemove(item.meal.id, item.meal.name)"
-                title="Sepetten Çıkar"
-              >🗑️</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sağ taraf - Sipariş Formu -->
-      <div class="order-form-section">
-        <div class="order-summary">
-          <h3>Sipariş Özeti</h3>
-          <div class="summary-line">
-            <span>Toplam Ürün:</span>
-            <span>{{ getTotalQuantity() }} adet</span>
-          </div>
-          <div class="summary-line total">
-            <span>Toplam Tutar:</span>
-            <span>₺{{ cart.totalPrice }}</span>
-          </div>
-        </div>
-
-        <form class="order-form" (ngSubmit)="placeOrder()">
-          <h3>Teslimat Bilgileri</h3>
-          
-          <div class="form-group">
-            <label for="address">Teslimat Adresi *</label>
-            <textarea
-              id="address"
-              [(ngModel)]="address"
-              name="address"
-              placeholder="Tam adresinizi yazın..."
-              required
-              rows="3"
-            ></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="phone">Telefon *</label>
-            <input
-              type="tel"
-              id="phone"
-              [(ngModel)]="phone"
-              name="phone"
-              placeholder="05XX XXX XX XX"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="notes">Sipariş Notu (Opsiyonel)</label>
-            <textarea
-              id="notes"
-              [(ngModel)]="notes"
-              name="notes"
-              placeholder="Özel istekleriniz..."
-              rows="2"
-            ></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Ödeme Yöntemi</label>
-            <div class="payment-options">
-              <label class="payment-option">
-                <input
-                  type="radio"
-                  name="paymentType"
-                  value="cash"
-                  [(ngModel)]="paymentType"
-                />
-                <span>💵 Nakit</span>
-              </label>
-              <label class="payment-option">
-                <input
-                  type="radio"
-                  name="paymentType"
-                  value="card"
-                  [(ngModel)]="paymentType"
-                />
-                <span>💳 Kart</span>
-              </label>
-            </div>
-          </div>
-
-          <button 
-            type="submit" 
-            class="place-order-btn"
-            [disabled]="isPlacingOrder"
-          >
-            <span *ngIf="!isPlacingOrder">Sipariş Ver - ₺{{ cart.totalPrice }}</span>
-            <span *ngIf="isPlacingOrder">Sipariş Veriliyor...</span>
-          </button>
-        </form>
-      </div>
+<!-- Sağ taraf - Sipariş Formu -->
+<div class="order-form-section">
+  <div class="order-summary">
+    <h3>Sipariş Özeti</h3>
+    <div class="summary-line">
+      <span>Toplam Ürün:</span>
+      <span>{{ getTotalQuantity() }} adet</span>
+    </div>
+    <div class="summary-line total">
+      <span>Toplam Tutar:</span>
+      <span>₺{{ cart.totalPrice }}</span>
     </div>
   </div>
 
-  <ng-template #emptyCart>
-    <div class="empty-cart">
-      <div class="empty-cart-content">
-        <div class="empty-cart-icon">🛒</div>
-        <h2>Sepetiniz Boş</h2>
-        <p>Henüz sepetinizde ürün bulunmuyor. Lezzetli yemekleri keşfetmek için alışverişe başlayın!</p>
-        <button class="start-shopping-btn" (click)="continueShopping()">
-          Alışverişe Başla
-        </button>
-      </div>
-    </div>
-  </ng-template>
+  <form class="order-form" (ngSubmit)="placeOrder()">
+    <h3>Teslimat Bilgileri</h3>
 
-  <app-confirm-dialog
-    *ngIf="confirmMessage"
-    [message]="confirmMessage"
-    (confirm)="onConfirm($event)"
-  ></app-confirm-dialog>
+    <div class="form-group">
+      <button type="submit" class="place-order-btn" [disabled]="isPlacingOrder">
+        <span *ngIf="!isPlacingOrder">Sipariş Ver - ₺{{ cart.totalPrice }}</span>
+        <span *ngIf="isPlacingOrder">Sipariş Veriliyor...</span>
+      </button>
+  </form>
+</div>
+</div>
+</div>
+
+<ng-template #emptyCart>
+  <div class="empty-cart">
+    <div class="empty-cart-content">
+      <div class="empty-cart-icon">🛒</div>
+      <h2>Sepetiniz Boş</h2>
+      <p>Henüz sepetinizde ürün bulunmuyor. Lezzetli yemekleri keşfetmek için alışverişe başlayın!</p>
+      <button class="start-shopping-btn" (click)="continueShopping()">
+        Alışverişe Başla
+      </button>
+    </div>
+  </div>
+</ng-template>
+
 </div>
