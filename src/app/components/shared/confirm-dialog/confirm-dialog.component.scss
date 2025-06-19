@@ -1,45 +1,107 @@
-.confirm-overlay {
+.confirm-dialog-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1060;
+  animation: fadeIn 0.2s ease-in-out;
 }
 
 .confirm-dialog {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  width: 300px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  min-width: 400px;
+  max-width: 500px;
+  animation: slideIn 0.3s ease-out;
+  
+  .confirm-dialog-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e9ecef;
+    
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #495057;
+    }
+  }
+  
+  .confirm-dialog-body {
+    padding: 20px 24px;
+    
+    p {
+      margin: 0;
+      color: #6c757d;
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+  }
+  
+  .confirm-dialog-actions {
+    padding: 16px 24px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    border-top: 1px solid #e9ecef;
+    
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 80px;
+      
+      &.btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        
+        &:hover {
+          background-color: #5a6268;
+        }
+      }
+      
+      &.btn-danger {
+        background-color: #dc3545;
+        color: white;
+        
+        &:hover {
+          background-color: #c82333;
+        }
+      }
+      
+      &:focus {
+        outline: 2px solid rgba(0, 123, 255, 0.25);
+        outline-offset: 2px;
+      }
+    }
+  }
 }
 
-.message {
-  margin: 0 0 20px 0;
-  color: #333;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  background: #ccc;
-  color: #333;
-}
-
-.btn.primary {
-  background: #3498db;
-  color: #fff;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
