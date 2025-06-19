@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { User, Meal, Order } from '../../models';
 import { AuthService } from '../../services/auth.service';
 import { DataService } from '../../services/data.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-restaurant-panel',
@@ -46,7 +47,8 @@ export class RestaurantPanelComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private dataService: DataService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -79,7 +81,7 @@ export class RestaurantPanelComponent implements OnInit {
   // Menü Yönetimi Metodları
   saveMeal(): void {
     if (!this.mealForm.name || !this.mealForm.price) {
-      alert('Lütfen tüm gerekli alanları doldurun!');
+      this.notificationService.notify('Lütfen tüm gerekli alanları doldurun!');
       return;
     }
 
@@ -93,6 +95,7 @@ export class RestaurantPanelComponent implements OnInit {
         image: this.mealForm.image
       };
       this.dataService.saveMeal(updatedMeal);
+      this.notificationService.notify('Yemek başarıyla güncellendi!');
     } else {
       // Yeni ekleme
       const newMeal: Meal = {
@@ -104,6 +107,7 @@ export class RestaurantPanelComponent implements OnInit {
         image: this.mealForm.image
       };
       this.dataService.saveMeal(newMeal);
+      this.notificationService.notify('Yeni yemek başarıyla eklendi!');
     }
 
     this.resetMealForm();
@@ -121,10 +125,18 @@ export class RestaurantPanelComponent implements OnInit {
     this.showAddMealForm = true;
   }
 
-  deleteMeal(mealId: string): void {
-    if (confirm('Bu yemeği silmek istediğinizden emin misiniz?')) {
+  async deleteMeal(mealId: string): Promise<void> {
+    const meal = this.restaurantMeals.find(m => m.id === mealId);
+    const mealName = meal ? meal.name : 'Bu yemek';
+    
+    const confirmed = await this.notificationService.confirm(
+      `${mealName} adlı yemeği silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`
+    );
+    
+    if (confirmed) {
       this.dataService.deleteMeal(mealId);
       this.loadMeals();
+      this.notificationService.notify('Yemek başarıyla silindi!');
     }
   }
 
@@ -162,12 +174,31 @@ export class RestaurantPanelComponent implements OnInit {
     return this.restaurantOrders.filter(order => order.status === status).length;
   }
 
-  updateOrderStatus(orderId: string, newStatus: Order['status']): void {
+  async updateOrderStatus(orderId: string, newStatus: Order['status']): Promise<void> {
     const order = this.restaurantOrders.find(o => o.id === orderId);
-    if (order) {
-      order.status = newStatus;
-      this.dataService.saveOrder(order);
-      this.loadOrders();
+    if (!order) return;
+
+    // Sipariş reddetme için onay iste
+    if (newStatus === 'cancelled') {
+      const confirmed = await this.notificationService.confirm(
+        'Bu siparişi reddetmek istediğinizden emin misiniz?'
+      );
+      if (!confirmed) return;
+    }
+
+    order.status = newStatus;
+    this.dataService.saveOrder(order);
+    this.loadOrders();
+
+    // Durum değişikliği bildirimları
+    const statusMessages: { [key: string]: string } = {
+      'inProgress': 'Sipariş kabul edildi ve hazırlanmaya başlandı!',
+      'readyForDelivery': 'Sipariş hazır ve teslimat için bekliyor!',
+      'cancelled': 'Sipariş reddedildi.'
+    };
+
+    if (statusMessages[newStatus]) {
+      this.notificationService.notify(statusMessages[newStatus]);
     }
   }
 
