@@ -5,16 +5,10 @@
   </div>
 
   <div class="tabs">
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'meals'"
-      (click)="activeTab = 'meals'">
+    <button class="tab-button" [class.active]="activeTab === 'meals'" (click)="activeTab = 'meals'">
       Menü Yönetimi
     </button>
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'orders'"
-      (click)="activeTab = 'orders'">
+    <button class="tab-button" [class.active]="activeTab === 'orders'" (click)="activeTab = 'orders'">
       Siparişler ({{ pendingOrdersCount }})
     </button>
   </div>
@@ -36,50 +30,33 @@
           <div class="form-group">
             <label for="mealName">Yemek Adı:</label>
             <div class="input-with-counter">
-              <input
-                type="text"
-                id="mealName"
-                [(ngModel)]="mealForm.name"
-                name="mealName"
-                maxlength="40"
-                required>
+              <input type="text" id="mealName" [(ngModel)]="mealForm.name" name="mealName" maxlength="40" required>
               <span class="char-counter">{{ mealForm.name.length }}/40</span>
             </div>
           </div>
-          
+
           <div class="form-group">
             <label for="mealPrice">Fiyat (₺):</label>
-            <input 
-              type="number" 
-              id="mealPrice" 
-              [(ngModel)]="mealForm.price" 
-              name="mealPrice"
-              min="0" 
-              step="0.5" 
+            <input type="number" id="mealPrice" [(ngModel)]="mealForm.price" name="mealPrice" min="0" step="0.5"
               required>
           </div>
-          
+
           <div class="form-group">
             <label for="mealDescription">Açıklama:</label>
-            <textarea
-              id="mealDescription"
-              [(ngModel)]="mealForm.description"
-              name="mealDescription"
-              rows="3"
-              maxlength="100">
-            </textarea>
+
+            <div class="input-with-counter">
+              <textarea id="mealDescription" [(ngModel)]="mealForm.description" name="mealDescription" rows="3"
+                maxlength="100">
+              </textarea>
+              <span class="char-counter">{{ mealForm.description.length }}/100</span>
+            </div>
           </div>
-          
+
           <div class="form-group">
             <label for="mealImage">Resim URL:</label>
-            <input 
-              type="url" 
-              id="mealImage" 
-              [(ngModel)]="mealForm.image"
-              name="mealImage"
-              placeholder="https://...">
+            <input type="url" id="mealImage" [(ngModel)]="mealForm.image" name="mealImage" placeholder="https://...">
           </div>
-          
+
           <div class="form-actions">
             <button type="submit" class="btn-primary">
               {{ editingMeal ? 'Güncelle' : 'Ekle' }}
@@ -119,12 +96,9 @@
   <div *ngIf="activeTab === 'orders'" class="tab-content">
     <div class="orders-section">
       <h2>Gelen Siparişler</h2>
-      
+
       <div class="orders-filter">
-        <button 
-          *ngFor="let status of orderStatuses" 
-          class="filter-btn"
-          [class.active]="selectedStatus === status.key"
+        <button *ngFor="let status of orderStatuses" class="filter-btn" [class.active]="selectedStatus === status.key"
           (click)="selectedStatus = status.key">
           {{ status.label }} ({{ getOrderCountByStatus(status.key) }})
         </button>
@@ -139,7 +113,7 @@
             </div>
             <div class="order-date">{{ formatDate(order.orderDate) }}</div>
           </div>
-          
+
           <div class="order-details">
             <div class="customer-info">
               <strong>Müşteri:</strong> {{ getCustomerName(order.customerId) }}
@@ -147,7 +121,7 @@
             <div class="delivery-address">
               <strong>Adres:</strong> {{ order.address }}
             </div>
-            
+
             <div class="order-items">
               <h4>Sipariş Detayları:</h4>
               <ul>
@@ -156,28 +130,22 @@
                 </li>
               </ul>
             </div>
-            
+
             <div class="order-total">
               <strong>Toplam: {{ getOrderTotal(order) }} ₺</strong>
             </div>
           </div>
-          
+
           <div class="order-actions">
-            <button 
-              *ngIf="order.status === 'pending'" 
-              class="btn-accept" 
+            <button *ngIf="order.status === 'pending'" class="btn-accept"
               (click)="updateOrderStatus(order.id, 'inProgress')">
               Siparişi Kabul Et
             </button>
-            <button 
-              *ngIf="order.status === 'inProgress'" 
-              class="btn-ready" 
+            <button *ngIf="order.status === 'inProgress'" class="btn-ready"
               (click)="updateOrderStatus(order.id, 'readyForDelivery')">
               Hazır - Teslimat İçin
             </button>
-            <button 
-              *ngIf="order.status === 'pending'" 
-              class="btn-reject" 
+            <button *ngIf="order.status === 'pending'" class="btn-reject"
               (click)="updateOrderStatus(order.id, 'cancelled')">
               Reddet
             </button>
