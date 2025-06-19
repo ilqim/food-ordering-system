@@ -35,12 +35,16 @@
         <form (ngSubmit)="saveMeal()">
           <div class="form-group">
             <label for="mealName">Yemek Adı:</label>
-            <input 
-              type="text" 
-              id="mealName" 
-              [(ngModel)]="mealForm.name" 
-              name="mealName"
-              required>
+            <div class="input-with-counter">
+              <input
+                type="text"
+                id="mealName"
+                [(ngModel)]="mealForm.name"
+                name="mealName"
+                maxlength="40"
+                required>
+              <span class="char-counter">{{ mealForm.name.length }}/40</span>
+            </div>
           </div>
           
           <div class="form-group">
@@ -57,11 +61,12 @@
           
           <div class="form-group">
             <label for="mealDescription">Açıklama:</label>
-            <textarea 
-              id="mealDescription" 
-              [(ngModel)]="mealForm.description" 
+            <textarea
+              id="mealDescription"
+              [(ngModel)]="mealForm.description"
               name="mealDescription"
-              rows="3">
+              rows="3"
+              maxlength="100">
             </textarea>
           </div>
           

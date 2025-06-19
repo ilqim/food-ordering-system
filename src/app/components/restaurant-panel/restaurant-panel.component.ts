@@ -17,7 +17,7 @@ import { NotificationService } from '../../services/notification.service';
 export class RestaurantPanelComponent implements OnInit {
   currentUser: User | null = null;
   activeTab: 'meals' | 'orders' = 'meals';
-  
+
   // Menü yönetimi
   restaurantMeals: Meal[] = [];
   showAddMealForm = false;
@@ -34,7 +34,7 @@ export class RestaurantPanelComponent implements OnInit {
   selectedStatus = 'all';
   customers: User[] = [];
   meals: Meal[] = [];
-  
+
   orderStatuses = [
     { key: 'all', label: 'Tümü' },
     { key: 'pending', label: 'Bekliyor' },
@@ -49,7 +49,7 @@ export class RestaurantPanelComponent implements OnInit {
     private dataService: DataService,
     private router: Router,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
@@ -82,6 +82,16 @@ export class RestaurantPanelComponent implements OnInit {
   saveMeal(): void {
     if (!this.mealForm.name || !this.mealForm.price) {
       this.notificationService.notify('Lütfen tüm gerekli alanları doldurun!');
+      return;
+    }
+
+    if (this.mealForm.name.length > 40) {
+      this.notificationService.notify('Yemek adı 40 karakterden uzun olamaz!');
+      return;
+    }
+
+    if (this.mealForm.description.length > 100) {
+      this.notificationService.notify('Açıklama 100 karakterden uzun olamaz!');
       return;
     }
 
@@ -128,11 +138,11 @@ export class RestaurantPanelComponent implements OnInit {
   async deleteMeal(mealId: string): Promise<void> {
     const meal = this.restaurantMeals.find(m => m.id === mealId);
     const mealName = meal ? meal.name : 'Bu yemek';
-    
+
     const confirmed = await this.notificationService.confirm(
       `${mealName} adlı yemeği silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`
     );
-    
+
     if (confirmed) {
       this.dataService.deleteMeal(mealId);
       this.loadMeals();

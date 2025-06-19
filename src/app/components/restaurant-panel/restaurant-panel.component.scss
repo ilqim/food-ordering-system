@@ -15,7 +15,7 @@
     padding: 2.5rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    
+
     h1 {
       color: white;
       margin-bottom: 0.5rem;
@@ -26,7 +26,7 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
     p {
       color: rgba(255, 255, 255, 0.9);
       font-size: 1.2rem;
@@ -72,7 +72,7 @@
       &:hover {
         color: white;
         transform: translateY(-2px);
-        
+
         &::before {
           left: 100%;
         }
@@ -131,6 +131,7 @@
           transform: translateY(-20px);
           opacity: 0;
         }
+
         to {
           transform: translateY(0);
           opacity: 1;
@@ -157,7 +158,8 @@
           letter-spacing: 0.5px;
         }
 
-        input, textarea {
+        input,
+        textarea {
           width: 100%;
           padding: 1rem;
           border: 2px solid #e2e8f0;
@@ -177,6 +179,24 @@
           &::placeholder {
             color: #a0aec0;
           }
+        }
+      }
+
+      .input-with-counter {
+        position: relative;
+
+        input,
+        textarea {
+          padding-right: 3rem;
+        }
+
+        .char-counter {
+          position: absolute;
+          right: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 0.8rem;
+          color: #718096;
         }
       }
 
@@ -218,7 +238,7 @@
         &:hover {
           transform: translateY(-8px) scale(1.02);
           box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-          
+
           &::before {
             opacity: 1;
           }
@@ -434,11 +454,12 @@
         .order-details {
           padding: 2rem;
 
-          .customer-info, .delivery-address {
+          .customer-info,
+          .delivery-address {
             margin-bottom: 1rem;
             color: #4a5568;
             font-weight: 500;
-            
+
             strong {
               color: #2d3748;
             }
@@ -589,7 +610,7 @@
     color: #718096;
     font-style: italic;
     font-size: 1.1rem;
-    
+
     p {
       margin: 0;
       padding: 2rem;
@@ -604,10 +625,10 @@
 @media (max-width: 1024px) {
   .restaurant-panel {
     padding: 1.5rem;
-    
+
     .panel-header {
       padding: 2rem;
-      
+
       h1 {
         font-size: 2rem;
       }
@@ -621,11 +642,11 @@
 
     .panel-header {
       padding: 1.5rem;
-      
+
       h1 {
         font-size: 1.8rem;
       }
-      
+
       p {
         font-size: 1rem;
       }
@@ -634,7 +655,7 @@
     .tabs {
       flex-direction: column;
       gap: 0.5rem;
-      
+
       .tab-button {
         width: 100%;
         padding: 1rem;
@@ -659,7 +680,7 @@
 
       .meal-form {
         padding: 1.5rem;
-        
+
         .form-actions {
           flex-direction: column;
         }
@@ -669,7 +690,7 @@
     .orders-section {
       .orders-filter {
         justify-content: center;
-        
+
         .filter-btn {
           flex: 1;
           min-width: 120px;
@@ -690,7 +711,7 @@
 
         .order-actions {
           flex-direction: column;
-          
+
           button {
             min-width: unset;
           }
@@ -703,15 +724,15 @@
 @media (max-width: 480px) {
   .restaurant-panel {
     padding: 0.5rem;
-    
+
     .panel-header {
       margin-bottom: 2rem;
     }
-    
+
     .tabs {
       margin-bottom: 1.5rem;
     }
-    
+
     .tab-content {
       padding: 1rem;
     }
@@ -724,26 +745,32 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.meal-item, .order-card {
+.meal-item,
+.order-card {
   animation: fadeInUp 0.6s ease-out;
 }
 
 // Scroll animasyonu
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }
 }
 
-.btn-primary:active, .btn-secondary:active {
+.btn-primary:active,
+.btn-secondary:active {
   animation: pulse 0.2s ease-in-out;
 }
