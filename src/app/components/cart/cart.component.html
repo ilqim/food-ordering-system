@@ -1,71 +1,117 @@
-<div class="section-header">
-  <h2>Sepetinizdeki Ürünler</h2>
-  <button class="clear-cart-btn" (click)="clearCart()">Sepeti Temizle</button>
-</div>
-
-<div class="restaurant-info" *ngIf="cart.restaurantName">
-  <h3>📍 {{ cart.restaurantName }}</h3>
-</div>
-
-<div class="cart-items">
-  <div class="cart-item" *ngFor="let item of cart.items">
-    <div class="item-image">
-      <img [src]="item.meal.image || '/assets/default-meal.jpg'" [alt]="item.meal.name" />
-    </div>
-
-    <div class="item-details">
-      <h4>{{ item.meal.name }}</h4>
-      <p class="item-description">{{ item.meal.description }}</p>
-      <div class="item-price">₺{{ item.meal.price }} / adet</div>
-    </div>
-
-    <div class="item-controls">
-      <div class="quantity-controls">
-        <button class="qty-btn" (click)="updateQuantity(item.meal.id, item.quantity - 1, item.meal.name)">-</button>
-        <span class="quantity">{{ item.quantity }}</span>
-        <button class="qty-btn" (click)="updateQuantity(item.meal.id, item.quantity + 1, item.meal.name)">+</button>
+<div class="cart-container">
+  <div class="cart-header">
+    <div class="header-content">
+      <div class="title-section">
+        <div class="cart-icon">🛒</div>
+        <h2>Sepetinizdeki Ürünler</h2>
       </div>
-
-      <div class="item-total">₺{{ item.meal.price * item.quantity }}</div>
-
-      <button class="remove-btn" (click)="removeItem(item.meal.id, item.meal.name)" title="Sepetten Çıkar">🗑️</button>
-    </div>
-  </div>
-</div>
-
-<!-- Sağ taraf - Sipariş Formu -->
-<div class="order-form-section">
-  <div class="order-summary">
-    <h3>Sipariş Özeti</h3>
-    <div class="summary-line">
-      <span>Toplam Ürün:</span>
-      <span>{{ getTotalQuantity() }} adet</span>
-    </div>
-    <div class="summary-line total">
-      <span>Toplam Tutar:</span>
-      <span>₺{{ cart.totalPrice }}</span>
-    </div>
-  </div>
-
-  <form class="order-form" (ngSubmit)="placeOrder()">
-    <h3>Teslimat Bilgileri</h3>
-
-    <div class="form-group">
-      <button type="submit" class="place-order-btn" [disabled]="isPlacingOrder">
-        <span *ngIf="!isPlacingOrder">Sipariş Ver - ₺{{ cart.totalPrice }}</span>
-        <span *ngIf="isPlacingOrder">Sipariş Veriliyor...</span>
+      <button class="clear-cart-btn" (click)="clearCart()">
+        <span class="btn-icon">🗑️</span>
+        Sepeti Temizle
       </button>
     </div>
-  </form>
+  </div>
+
+  <div class="restaurant-info" *ngIf="cart.restaurantName">
+    <div class="restaurant-badge">
+      <span class="location-icon">📍</span>
+      <h3>{{ cart.restaurantName }}</h3>
+    </div>
+  </div>
+
+  <div class="cart-content">
+    <div class="cart-items-section">
+      <div class="cart-items">
+        <div class="cart-item" *ngFor="let item of cart.items; trackBy: trackByMealId">
+          <div class="item-image">
+            <img [src]="item.meal.image || '/assets/default-meal.jpg'" [alt]="item.meal.name" />
+            <div class="image-overlay"></div>
+          </div>
+
+          <div class="item-details">
+            <h4>{{ item.meal.name }}</h4>
+            <p class="item-description">{{ item.meal.description }}</p>
+            <div class="item-price">₺{{ item.meal.price }} / adet</div>
+          </div>
+
+          <div class="item-controls">
+            <div class="quantity-controls">
+              <button class="qty-btn minus" (click)="updateQuantity(item.meal.id, item.quantity - 1, item.meal.name)">
+                <span>−</span>
+              </button>
+              <span class="quantity">{{ item.quantity }}</span>
+              <button class="qty-btn plus" (click)="updateQuantity(item.meal.id, item.quantity + 1, item.meal.name)">
+                <span>+</span>
+              </button>
+            </div>
+
+            <div class="item-total">₺{{ item.meal.price * item.quantity }}</div>
+
+            <button class="remove-btn" (click)="removeItem(item.meal.id, item.meal.name)" title="Sepetten Çıkar">
+              <span>🗑️</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sağ taraf - Sipariş Formu -->
+    <div class="order-form-section">
+      <div class="order-summary">
+        <div class="summary-header">
+          <h3>Sipariş Özeti</h3>
+          <div class="summary-icon">📋</div>
+        </div>
+        
+        <div class="summary-content">
+          <div class="summary-line">
+            <span>Toplam Ürün:</span>
+            <span class="value">{{ getTotalQuantity() }} adet</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-line total">
+            <span>Toplam Tutar:</span>
+            <span class="value">₺{{ cart.totalPrice }}</span>
+          </div>
+        </div>
+      </div>
+
+      <form class="order-form" (ngSubmit)="placeOrder()">
+        <div class="form-header">
+          <h3>Teslimat Bilgileri</h3>
+          <div class="delivery-icon">🚚</div>
+        </div>
+
+        <div class="form-group">
+          <button type="submit" class="place-order-btn" [disabled]="isPlacingOrder">
+            <div class="btn-content">
+              <span class="btn-icon" *ngIf="!isPlacingOrder">🎯</span>
+              <span class="btn-icon spinning" *ngIf="isPlacingOrder">⏳</span>
+              <span class="btn-text" *ngIf="!isPlacingOrder">Sipariş Ver - ₺{{ cart.totalPrice }}</span>
+              <span class="btn-text" *ngIf="isPlacingOrder">Sipariş Veriliyor...</span>
+            </div>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <ng-template #emptyCart>
   <div class="empty-cart">
     <div class="empty-cart-content">
-      <div class="empty-cart-icon">🛒</div>
+      <div class="empty-animation">
+        <div class="empty-cart-icon">🛒</div>
+        <div class="floating-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
       <h2>Sepetiniz Boş</h2>
       <p>Henüz sepetinizde ürün bulunmuyor. Lezzetli yemekleri keşfetmek için alışverişe başlayın!</p>
       <button class="start-shopping-btn" (click)="continueShopping()">
+        <span class="btn-icon">🍽️</span>
         Alışverişe Başla
       </button>
     </div>

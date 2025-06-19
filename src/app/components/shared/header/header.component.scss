@@ -1,20 +1,30 @@
 .header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  // Blur arka plan için ayrı katman
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    opacity: 0.9;
+    z-index: -1;
+  }
 
   .container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 30px;
+    position: relative; // üstte tutmak için
+    z-index: 1;
   }
 
   .header-content {
@@ -32,14 +42,13 @@
       font-size: 28px;
       font-weight: 800;
       text-decoration: none;
-      color: white;
       background: linear-gradient(45deg, #fff, #e2e8f0);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       transition: var(--transition-smooth);
       position: relative;
-      
+
       &::after {
         content: '';
         position: absolute;
@@ -51,10 +60,10 @@
         border-radius: 2px;
         transition: var(--transition-smooth);
       }
-      
+
       &:hover {
         transform: scale(1.05);
-        
+
         &::after {
           width: 100%;
         }
@@ -82,22 +91,19 @@
           font-size: 15px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          
+
           &::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 25px;
             opacity: 0;
             transition: var(--transition-smooth);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            // backdrop-filter: blur(10px); // Bu satırı kaldırdım
+            // -webkit-backdrop-filter: blur(10px); // Bu satırı kaldırdım
           }
-          
+
           &::after {
             content: '';
             position: absolute;
@@ -111,13 +117,14 @@
             transition: var(--transition-smooth);
           }
 
-          &:hover, &.active {
+          &:hover,
+          &.active {
             transform: translateY(-3px);
-            
+
             &::before {
               opacity: 1;
             }
-            
+
             &::after {
               width: 80%;
             }
@@ -141,7 +148,7 @@
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
             animation: pulse 2s infinite;
             position: relative;
-            
+
             &::before {
               content: '';
               position: absolute;
@@ -172,7 +179,7 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: var(--transition-smooth);
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.15);
       transform: translateY(-2px);
@@ -182,7 +189,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      
+
       .user-name {
         font-weight: 700;
         font-size: 16px;
@@ -215,7 +222,7 @@
       box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
       position: relative;
       overflow: hidden;
-      
+
       &::before {
         content: '';
         position: absolute;
@@ -230,7 +237,7 @@
       &:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-        
+
         &::before {
           left: 100%;
         }
